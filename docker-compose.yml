@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: personnel-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "191102"
+      POSTGRES_DB: personnel
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d personnel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - personnel-network
+
+networks:
+  personnel-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
