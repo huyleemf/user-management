@@ -20,7 +20,6 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const port = process.env.PORT || 4000;
 const host = process.env.HOST || "localhost";
-
 if (process.env.NODE_ENV === "development") {
   db.sequelize
     .sync() // create if not exist
