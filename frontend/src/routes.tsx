@@ -1,9 +1,16 @@
+import { lazy } from "react";
 import { createBrowserRouter } from "react-router";
-import UsersTable from "./features/users/pages/Table";
+
+const MemberTable = lazy(() => import("./features/users/pages/MemberTable"));
+const ManagerTable = lazy(() => import("./features/users/pages/ManagerTable"));
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <UsersTable />,
+    path: "/members",
+    element: <MemberTable />,
+  },
+  {
+    path: "/managers",
+    element: <ManagerTable />,
   },
 ]);
 

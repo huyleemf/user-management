@@ -5,9 +5,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Activity } from "react";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import { stringAvatar } from "../../utils/utils";
+
 export const columns: ColumnDef<User>[] = [
   {
     id: "select",
+    maxSize: 10,
     header: () => (
       <Checkbox
         // checked={
@@ -26,10 +28,23 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "username",
-    header: () => (
+    filterFn: (row, columnId, filterValue) => {
+      const username = row.original.username?.toLowerCase() ?? "";
+      const email = row.original.email?.toLowerCase() ?? "";
+      const searchValue = filterValue?.toLowerCase() ?? "";
+
+      return username.includes(searchValue) || email.includes(searchValue);
+    },
+    header: ({ table }) => (
       <div>
         <Input
           placeholder="Search by name/email"
+          value={
+            (table.getColumn("username")?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) =>
+            table.getColumn("username")?.setFilterValue(event.target.value)
+          }
           startAdornment={
             <SearchIcon
               style={{
