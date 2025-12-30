@@ -1,8 +1,9 @@
 import { createBrowserRouter } from "react-router";
+import UsersTable from "./features/users/pages/Table";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <div>Hello World</div>,
+    element: <UsersTable />,
   },
 ]);
 

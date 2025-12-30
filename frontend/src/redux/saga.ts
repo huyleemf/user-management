@@ -1,5 +1,6 @@
-import { all } from "redux-saga/effects";
+import { watchFetchUsers } from "@/features/users/saga/fetch-users";
+import { all, fork } from "redux-saga/effects";
 
 export default function* saga() {
-  yield all([]);
+  yield all([fork(watchFetchUsers)]);
 }
