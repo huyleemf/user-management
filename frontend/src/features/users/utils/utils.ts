@@ -26,4 +26,11 @@ function stringAvatar(name: string) {
     children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
   };
 }
-export { stringToColor, stringAvatar };
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+}
+export { stringToColor, stringAvatar, a11yProps };
