@@ -1,13 +1,6 @@
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { User } from "../api/types";
+import type { User, UserByRole } from "../api/types";
 import type { UserState } from "./types";
-
-export const initialUserState: UserState = {
-  data: [],
-  loading: false,
-  error: null,
-  lastFetched: null,
-};
 
 export const fetchUserReducers = {
   fetchUsersRequested(
@@ -19,10 +12,50 @@ export const fetchUserReducers = {
   },
   fetchUsersSucceeded(state: UserState, action: PayloadAction<User[]>) {
     state.loading = false;
-    state.data = action.payload;
+    state.users = action.payload;
     state.lastFetched = Date.now();
   },
   fetchUsersFailed(state: UserState, action: PayloadAction<string>) {
+    state.loading = false;
+    state.error = action.payload;
+    state.lastFetched = Date.now();
+  },
+};
+
+export const fetchUsersByRoleReducers = {
+  fetchManagersRequested(
+    state: UserState,
+    action: PayloadAction<string | undefined>
+  ) {
+    state.loading = true;
+    state.error = null;
+  },
+  fetchManagersSucceeded(
+    state: UserState,
+    action: PayloadAction<UserByRole[]>
+  ) {
+    state.loading = false;
+    state.managers = action.payload;
+    state.lastFetched = Date.now();
+  },
+  fetchManagersFailed(state: UserState, action: PayloadAction<string>) {
+    state.loading = false;
+    state.error = action.payload;
+    state.lastFetched = Date.now();
+  },
+  fetchMembersRequested(
+    state: UserState,
+    action: PayloadAction<string | undefined>
+  ) {
+    state.loading = true;
+    state.error = null;
+  },
+  fetchMembersSucceeded(state: UserState, action: PayloadAction<UserByRole[]>) {
+    state.loading = false;
+    state.members = action.payload;
+    state.lastFetched = Date.now();
+  },
+  fetchMembersFailed(state: UserState, action: PayloadAction<string>) {
     state.loading = false;
     state.error = action.payload;
     state.lastFetched = Date.now();

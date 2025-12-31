@@ -1,9 +1,18 @@
-import { Avatar, Box, Checkbox, Input, Stack, Typography } from "@mui/material";
-import type { User } from "../../api/types";
-import { type ColumnDef } from "@tanstack/react-table";
-import SearchIcon from "@mui/icons-material/Search";
-import { Activity } from "react";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import SearchIcon from "@mui/icons-material/Search";
+import {
+  Avatar,
+  Box,
+  Checkbox,
+  Chip,
+  IconButton,
+  Input,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { type ColumnDef } from "@tanstack/react-table";
+import { Activity } from "react";
+import type { User } from "../../api/types";
 import { stringAvatar } from "../../utils/utils";
 
 export const columns: ColumnDef<User>[] = [
@@ -28,7 +37,7 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "username",
-    filterFn: (row, columnId, filterValue) => {
+    filterFn: (row, _, filterValue) => {
       const username = row.original.username?.toLowerCase() ?? "";
       const email = row.original.email?.toLowerCase() ?? "";
       const searchValue = filterValue?.toLowerCase() ?? "";
@@ -68,7 +77,11 @@ export const columns: ColumnDef<User>[] = [
               <Activity
                 name="isManager"
                 mode={row.original.role == "MANAGER" ? "visible" : "hidden"}
-                children={<AssignmentIndIcon />}
+                children={
+                  <IconButton>
+                    <AssignmentIndIcon />
+                  </IconButton>
+                }
               />
             </Stack>
             <Typography
@@ -99,9 +112,7 @@ export const columns: ColumnDef<User>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <Typography color="textSecondary" fontSize={16} variant="body1">
-          {row.original.role}
-        </Typography>
+        <Chip variant="filled" label={row.original.role} color="primary" />
       );
     },
   },
