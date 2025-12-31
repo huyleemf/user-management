@@ -3,11 +3,11 @@ import { DataTable } from "../components/table/table";
 import { columns } from "../components/table/columns";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "@/redux/store";
-import { userActions } from "../redux/slice";
 import { UserRoles } from "../api/types";
 import { Box, CircularProgress, Stack } from "@mui/material";
+import { userActions } from "../redux/slice";
 
-const UsersTable: React.FC = () => {
+const MemberTable: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const {
@@ -43,4 +43,4 @@ const UsersTable: React.FC = () => {
   return <DataTable columns={columns} data={users} />;
 };
 
-export default UsersTable;
+export default MemberTable;

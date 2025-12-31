@@ -7,5 +7,11 @@ export type User = {
   createdAt: Date;
 };
 
+export type UserByRole = {
+  userId: string;
+  username: string;
+  email: string;
+};
+
 export type UserRole = "MANAGER" | "MEMBER";
 export const UserRoles = { MANAGER: "MANAGER", MEMBER: "MEMBER" };
