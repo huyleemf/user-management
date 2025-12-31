@@ -126,7 +126,7 @@ function UserListItem({
   return (
     <ListItem disableGutters>
       <ListItemAvatar>
-        <Avatar {...stringAvatar(user.username)} />
+        <Avatar {...stringAvatar(user ? user.username : "John Doe")} />
       </ListItemAvatar>
 
       <ListItemText

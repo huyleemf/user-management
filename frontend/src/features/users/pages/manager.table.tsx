@@ -10,11 +10,9 @@ import { userActions } from "../redux/slice";
 const ManagerTable: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const {
-    data: users,
-    loading,
-    error,
-  } = useSelector((state: RootState) => state.user);
+  const { users, loading, error } = useSelector(
+    (state: RootState) => state.user
+  );
 
   useEffect(() => {
     dispatch(userActions.fetchUsersRequested(UserRoles.MANAGER));

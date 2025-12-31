@@ -1,3 +1,4 @@
+import { storage } from "@/features/users/utils/storage";
 import type { CreateTeamRequest, CreateTeamResponse } from "./types";
 
 const API_URL = `${import.meta.env.VITE_TEAM_SERVICE_API_URL}/teams`;
@@ -10,7 +11,7 @@ async function createTeam(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+        Authorization: `Bearer ${storage.get("accessToken") || ""}`,
       },
 
       body: JSON.stringify(formData),

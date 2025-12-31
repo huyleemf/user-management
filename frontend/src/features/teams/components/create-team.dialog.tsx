@@ -4,6 +4,7 @@ import type { AppDispatch, RootState } from "@/redux/store";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import GroupIcon from "@mui/icons-material/Group";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -21,9 +22,9 @@ import {
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import TabsPanel from "./tabs-panel";
-import SearchIcon from "@mui/icons-material/Search";
 import type { CreateTeamRequest } from "../api/types";
+import { useCreateTeamMutation } from "../queries/mutation";
+import TabsPanel from "./tabs-panel";
 
 const CreateTeamDialog: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
@@ -35,6 +36,8 @@ const CreateTeamDialog: React.FC = () => {
     members: [],
   });
   const dispatch = useDispatch<AppDispatch>();
+
+  const { mutate } = useCreateTeamMutation();
 
   const { managers, members, loading, error } = useSelector(
     (state: RootState) => state.user
@@ -58,6 +61,21 @@ const CreateTeamDialog: React.FC = () => {
     },
     []
   );
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form Data Submitted: ", formData);
+    mutate(formData, {
+      onSuccess: () => {
+        setOpen(false);
+        setFormData({
+          teamName: "",
+          managers: [],
+          members: [],
+        });
+        alert("Team created successfully!");
+      },
+    });
+  };
 
   const handleSelectAll = () => {
     if (value === 1) {
@@ -286,16 +304,15 @@ const CreateTeamDialog: React.FC = () => {
             Cancel
           </Button>
           <Button
-            type="submit"
             variant="contained"
-            form="subscription-form"
+            onClick={handleSubmit}
             disabled={
               loading ||
               formData.teamName.trim() === "" ||
               (formData.members.length === 0 && formData.managers.length === 0)
             }
           >
-            Update
+            Create
           </Button>
         </DialogActions>
       </Dialog>
