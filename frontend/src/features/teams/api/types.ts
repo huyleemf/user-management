@@ -21,3 +21,21 @@ export interface CreateTeamResponse {
     createdAt: Date;
   };
 }
+
+export interface GetTeamsResponse {
+  teamId: string;
+  teamName: string;
+  teamLeader: {
+    userId: string;
+    username: string;
+  };
+  managers: {
+    managerId: string;
+    managerName: string;
+  }[];
+
+  members: {
+    memberId: string;
+    memberName: string;
+  }[];
+}
