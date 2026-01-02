@@ -4,6 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -24,6 +25,7 @@ import {
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../../redux/slice";
+import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 interface TeamDetailDialogProps {
   userId: string;
 }
@@ -51,7 +53,7 @@ const TeamDetailDialog: React.FC<TeamDetailDialogProps> = ({ userId }) => {
       <Button variant="outlined" onClick={handleClickOpen}>
         View Team
       </Button>
-      <Dialog onClose={handleClose} open={open}>
+      <Dialog maxWidth="md" onClose={handleClose} open={open}>
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
           Team Details
         </DialogTitle>
@@ -67,7 +69,12 @@ const TeamDetailDialog: React.FC<TeamDetailDialogProps> = ({ userId }) => {
         >
           <CloseIcon />
         </IconButton>
-        <DialogContent dividers>
+        <DialogContent
+          sx={{
+            minWidth: 650,
+          }}
+          dividers
+        >
           {(!userTeam || userTeam.length === 0) && (
             <Stack>
               <Typography>No team data available.</Typography>
@@ -90,7 +97,9 @@ const TeamDetailDialog: React.FC<TeamDetailDialogProps> = ({ userId }) => {
                   </Typography>
                 </Stack>
                 <TeamDetailTable teamId={team.teamId} />
-                {index % 2 == 0 && <Divider sx={{ marginTop: 2 }} />}
+                {index !== userTeam.length - 1 && (
+                  <Divider sx={{ marginTop: 2 }} />
+                )}
               </Box>
             ))}
         </DialogContent>
@@ -140,9 +149,34 @@ const TeamDetailTable: React.FC<{ teamId: string }> = ({ teamId }) => {
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                Team Leader
+                <Chip
+                  variant="filled"
+                  color="primary"
+                  label={
+                    <Stack direction={"row"} alignItems="center" gap={1}>
+                      <EmojiPeopleIcon />
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Team Leader
+                      </Typography>
+                    </Stack>
+                  }
+                />
               </TableCell>
-              <TableCell>{team.teamLeader.username}</TableCell>
+              <TableCell>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    textDecoration: "underline",
+                  }}
+                >
+                  {team.teamLeader.username}
+                </Typography>
+              </TableCell>
             </TableRow>
           )}
           {team?.managers?.map((manager) => (
@@ -151,7 +185,7 @@ const TeamDetailTable: React.FC<{ teamId: string }> = ({ teamId }) => {
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                Manager
+                <Chip label="Manager" />
               </TableCell>
               <TableCell>{manager.managerName}</TableCell>
             </TableRow>
@@ -162,7 +196,7 @@ const TeamDetailTable: React.FC<{ teamId: string }> = ({ teamId }) => {
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                Member
+                <Chip label="Member" />
               </TableCell>
               <TableCell>{member.memberName}</TableCell>
             </TableRow>
