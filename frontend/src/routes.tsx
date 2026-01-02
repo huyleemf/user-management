@@ -20,8 +20,8 @@ const router = createBrowserRouter([
     element: <SignIn />,
   },
   {
-    path: "/teams",
-    element: <Teams />,
+    Component: DashboardLayout,
+    children: [{ path: "/teams", element: <Teams /> }],
   },
 ]);
 

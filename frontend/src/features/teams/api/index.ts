@@ -4,10 +4,11 @@ import type {
   CreateTeamResponse,
   GetTeamsResponse,
 } from "./types";
+import { enqueueSnackbar } from "notistack";
 
 const API_URL = `${import.meta.env.VITE_TEAM_SERVICE_API_URL}/teams`;
 
-async function getTeams(): Promise<GetTeamsResponse> {
+async function getTeams(): Promise<GetTeamsResponse[]> {
   try {
     const response = await fetch(`${API_URL}`, {
       method: "GET",
@@ -23,6 +24,7 @@ async function getTeams(): Promise<GetTeamsResponse> {
     return data;
   } catch (error) {
     console.error(error);
+    enqueueSnackbar(error + "", { variant: "error" });
     return Promise.reject(error);
   }
 }
@@ -46,6 +48,7 @@ async function createTeam(
     const data = await response.json();
     return data;
   } catch (error) {
+    enqueueSnackbar(error + "", { variant: "error" });
     console.error(error);
     return Promise.reject(error);
   }

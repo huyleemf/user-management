@@ -25,6 +25,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { CreateTeamRequest } from "../api/types";
 import { useCreateTeamMutation } from "../queries/mutation";
 import TabsPanel from "./tabs-panel";
+import { enqueueSnackbar } from "notistack";
 
 const CreateTeamDialog: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
@@ -72,7 +73,7 @@ const CreateTeamDialog: React.FC = () => {
           managers: [],
           members: [],
         });
-        alert("Team created successfully!");
+        enqueueSnackbar("Team created successfully!", { variant: "success" });
       },
     });
   };

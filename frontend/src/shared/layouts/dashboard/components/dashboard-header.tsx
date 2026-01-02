@@ -1,29 +1,37 @@
 import { a11yProps } from "@/features/users/utils/utils";
-import type { AppDispatch, RootState } from "@/redux/store";
 import Person2Icon from "@mui/icons-material/Person2";
-import { Box, Chip, Stack, Tab, Tabs, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
-import { userActions } from "@/features/users/redux/slice";
+import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 
 const DashboardHeader: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-  const [value, setValue] = useState<number>(0);
-
-  const { managers, members, loading } = useSelector(
-    (state: RootState) => state.user
+  const location = useLocation().pathname;
+  const [value, setValue] = useState<number>(() =>
+    location === "/members"
+      ? 0
+      : location === "/managers"
+      ? 1
+      : location === "/teams"
+      ? 2
+      : 0
   );
-
-  useEffect(() => {
-    dispatch(userActions.fetchManagersRequested());
-    dispatch(userActions.fetchMembersRequested());
-  }, [dispatch]);
 
   const handleChange = (newValue: number) => {
     setValue(newValue);
-    navigate(newValue === 0 ? "/members" : "/managers");
+    switch (newValue) {
+      case 0:
+        navigate("/members");
+        break;
+      case 1:
+        navigate("/managers");
+        break;
+      case 2:
+        navigate("/teams");
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -44,7 +52,7 @@ const DashboardHeader: React.FC = () => {
               <Stack direction={"row"} alignItems={"center"} gap={1}>
                 <Person2Icon />
                 <Typography>Members</Typography>
-                <Chip
+                {/* <Chip
                   label={loading ? "..." : members.length}
                   sx={{
                     height: "fit-content",
@@ -56,7 +64,7 @@ const DashboardHeader: React.FC = () => {
                       },
                     },
                   }}
-                />
+                /> */}
               </Stack>
             }
             {...a11yProps(0)}
@@ -66,7 +74,7 @@ const DashboardHeader: React.FC = () => {
               <Stack direction={"row"} alignItems={"center"} gap={1}>
                 <Person2Icon />
                 <Typography>Managers</Typography>
-                <Chip
+                {/* <Chip
                   label={loading ? "..." : managers.length}
                   sx={{
                     height: "fit-content",
@@ -78,10 +86,32 @@ const DashboardHeader: React.FC = () => {
                       },
                     },
                   }}
-                />
+                /> */}
               </Stack>
             }
             {...a11yProps(1)}
+          />
+          <Tab
+            label={
+              <Stack direction={"row"} alignItems={"center"} gap={1}>
+                <Person2Icon />
+                <Typography>Teams</Typography>
+                {/* <Chip
+                  label={loading ? "..." : managers.length}
+                  sx={{
+                    height: "fit-content",
+                  }}
+                  slotProps={{
+                    label: {
+                      style: {
+                        padding: "0 6px",
+                      },
+                    },
+                  }}
+                /> */}
+              </Stack>
+            }
+            {...a11yProps(2)}
           />
         </Tabs>
       </Box>

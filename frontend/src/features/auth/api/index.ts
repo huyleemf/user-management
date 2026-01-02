@@ -6,11 +6,13 @@ async function login({
   email,
   password,
 }: LoginRequest): Promise<LoginResponse> {
-  const { data } = await apolloClient.mutate({
+  const { data } = await apolloClient.mutate<{
+    login: LoginResponse;
+  }>({
     mutation: LOGIN,
     variables: { email, password },
   });
-  return data.login as LoginResponse;
+  return data?.login as LoginResponse;
 }
 
 export { login };

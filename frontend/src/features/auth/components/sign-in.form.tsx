@@ -12,6 +12,7 @@ import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../redux/slice";
+import { enqueueSnackbar } from "notistack";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -70,7 +71,7 @@ export default function SignInForm() {
   React.useEffect(() => {
     if (error) {
       console.error("Login error:", error);
-      alert(error);
+      enqueueSnackbar(error, { variant: "error" });
     }
   }, [error]);
   React.useEffect(() => {
