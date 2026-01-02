@@ -1,4 +1,5 @@
-import React from "react";
+import { stringAvatar } from "@/shared/utils/utils";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Avatar,
   AvatarGroup,
@@ -9,10 +10,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { stringAvatar } from "@/shared/utils/utils";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import React from "react";
 import type { GetTeamsResponse } from "../../api/types";
+import EditTeamDialog from "../dialog/edit-team";
 interface TeamCardProps {
   card: GetTeamsResponse;
 }
@@ -25,9 +25,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ card }) => {
         }}
         action={
           <Stack direction="row" spacing={1}>
-            <IconButton>
-              <EditIcon />
-            </IconButton>
+            <EditTeamDialog teamId={card.teamId} />
             <IconButton>
               <DeleteIcon />
             </IconButton>

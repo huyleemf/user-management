@@ -1,5 +1,6 @@
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { initialState, type AuthState } from "./types";
+import { storage } from "@/shared/utils/storage";
 
 export const authReducer = {
   loginRequested(
@@ -23,6 +24,9 @@ export const authReducer = {
     state.error = action.payload;
   },
   logout(state: AuthState) {
+    storage.remove("accessToken");
+    storage.remove("user");
+
     return initialState;
   },
 };

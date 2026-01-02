@@ -1,12 +1,29 @@
-import { a11yProps } from "@/shared/utils/utils";
+import { authActions } from "@/features/auth/redux/slice";
+import type { User } from "@/features/users/api/types";
+import type { AppDispatch } from "@/redux/store";
+import { storage } from "@/shared/utils/storage";
+import { a11yProps, stringAvatar } from "@/shared/utils/utils";
+import LogoutIcon from "@mui/icons-material/Logout";
 import Person2Icon from "@mui/icons-material/Person2";
-import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  IconButton,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router";
-
+import EngineeringIcon from "@mui/icons-material/Engineering";
+import GroupsIcon from "@mui/icons-material/Groups";
 const DashboardHeader: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const location = useLocation().pathname;
+  const user: User | null = storage.get("user");
   const [value, setValue] = useState<number>(() =>
     location === "/members"
       ? 0
@@ -17,6 +34,10 @@ const DashboardHeader: React.FC = () => {
       : 0
   );
 
+  const handleLogout = () => {
+    dispatch(authActions.logout());
+    navigate("/sign-in");
+  };
   const handleChange = (newValue: number) => {
     setValue(newValue);
     switch (newValue) {
@@ -36,15 +57,33 @@ const DashboardHeader: React.FC = () => {
 
   return (
     <Box boxShadow={2}>
-      <Typography
-        variant="h4"
-        fontWeight={600}
-        padding={2}
-        component="h1"
-        gutterBottom
+      <Stack
+        direction={"row"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
       >
-        User Management
-      </Typography>
+        <Typography
+          variant="h4"
+          fontWeight={600}
+          padding={2}
+          component="h1"
+          gutterBottom
+        >
+          User Management
+        </Typography>
+        <Stack direction={"row"} alignItems={"center"} gap={2} padding={2}>
+          <Avatar {...stringAvatar(user?.username || "")} />
+          <Box component={"div"} textAlign={"start"}>
+            <Typography variant="body1">{user?.username}</Typography>
+            <Typography variant="body1" color="text.secondary">
+              {user?.role}
+            </Typography>
+          </Box>
+          <IconButton onClick={handleLogout} title="Logout">
+            <LogoutIcon />
+          </IconButton>
+        </Stack>
+      </Stack>
       <Box paddingInline={2}>
         <Tabs value={value} onChange={(_, newValue) => handleChange(newValue)}>
           <Tab
@@ -72,7 +111,7 @@ const DashboardHeader: React.FC = () => {
           <Tab
             label={
               <Stack direction={"row"} alignItems={"center"} gap={1}>
-                <Person2Icon />
+                <EngineeringIcon />
                 <Typography>Managers</Typography>
                 {/* <Chip
                   label={loading ? "..." : managers.length}
@@ -94,7 +133,7 @@ const DashboardHeader: React.FC = () => {
           <Tab
             label={
               <Stack direction={"row"} alignItems={"center"} gap={1}>
-                <Person2Icon />
+                <GroupsIcon />
                 <Typography>Teams</Typography>
                 {/* <Chip
                   label={loading ? "..." : managers.length}

@@ -22,6 +22,9 @@ function* loginSaga(
     if (response.accessToken) {
       storage.set("accessToken", response.accessToken);
     }
+    if (response.user) {
+      storage.set("user", response.user);
+    }
 
     yield put(
       authActions.loginSucceeded({
