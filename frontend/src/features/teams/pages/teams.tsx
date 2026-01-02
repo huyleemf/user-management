@@ -26,16 +26,17 @@ const Teams: React.FC = () => {
         const matchedTeam = team.teamName
           .toLowerCase()
           .includes(searchValue.toLowerCase());
+        const isAdmin = team.teamLeader.userId === user?.userId;
         const isMember = team.members.some(
           (member) => member.memberId === user?.userId
         );
         const isManager = team.managers.some(
           (manager) => manager.managerId === user?.userId
         );
-        return matchedTeam && (isMember || isManager);
+        return matchedTeam && (isAdmin || isMember || isManager);
       })
     );
-  }, [searchValue, teams]);
+  }, [searchValue, teams, user]);
   return (
     <Box
       sx={{

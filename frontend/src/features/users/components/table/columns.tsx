@@ -12,27 +12,16 @@ import {
 } from "@mui/material";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Activity } from "react";
-import type { User } from "../../api/types";
 import { stringAvatar } from "../../../../shared/utils/utils";
-import TeamDetailDialog from "../dialog/team-details";
+import type { User } from "../../api/types";
+import UserTeamsChips from "../dialog/team-details";
 
 export const columns: ColumnDef<User>[] = [
   {
     id: "select",
     maxSize: 10,
-    header: () => (
-      <Checkbox
-        // checked={
-        //   table.getIsAllPageRowsSelected() ||
-        //   (table.getIsSomePageRowsSelected() && "indeterminate")
-        // }
-        // onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox checked={row.getIsSelected()} aria-label="Select row" />
-    ),
+    header: () => <Checkbox aria-label="Select all" />,
+    cell: () => <Checkbox aria-label="Select row" />,
     enableSorting: false,
     enableHiding: false,
   },
@@ -100,6 +89,22 @@ export const columns: ColumnDef<User>[] = [
     },
   },
   {
+    id: "teamDetails",
+    header: () => (
+      <Typography
+        variant="body1"
+        fontSize={16}
+        color="textSecondary"
+        fontWeight={600}
+      >
+        Teams
+      </Typography>
+    ),
+    cell: ({ row }) => {
+      return <UserTeamsChips userId={row.original.userId} />;
+    },
+  },
+  {
     accessorKey: "role",
     header: () => (
       <Typography
@@ -135,12 +140,6 @@ export const columns: ColumnDef<User>[] = [
           {new Date(row.original.createdAt)?.toLocaleDateString() ?? ""}
         </Typography>
       );
-    },
-  },
-  {
-    id: "teamDetails",
-    cell: ({ row }) => {
-      return <TeamDetailDialog userId={row.original.userId} />;
     },
   },
 ];

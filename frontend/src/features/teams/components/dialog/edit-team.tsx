@@ -1,13 +1,16 @@
+import { stringAvatar } from "@/shared/utils/utils";
 import EditIcon from "@mui/icons-material/Edit";
-import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import {
+  Avatar,
   Box,
   Button,
   Chip,
   CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
   IconButton,
   Paper,
   Stack,
@@ -17,167 +20,266 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import type { GetTeamsResponse } from "../../api/types";
 import { useGetTeamByIdQuery } from "../../queries/query";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
+import AddUserDialog from "./add-user";
+import DeleteUserDialog from "./del-user";
+
+// --- 1. Main Dialog Component ---
 const EditTeamDialog: React.FC<{ teamId: string }> = ({ teamId }) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const theme = useTheme();
+  // Full screen on mobile for better UX
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+
   const {
     data: team,
     error,
     isLoading,
-  } = useGetTeamByIdQuery(teamId, {
-    enabled: open,
-  });
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
+  } = useGetTeamByIdQuery(teamId, { enabled: open });
 
   return (
     <>
-      <IconButton onClick={handleClickOpen}>
-        <EditIcon />
-      </IconButton>
-      <Dialog maxWidth="xl" open={open} onClose={handleClose}>
-        <DialogTitle>
+      <Tooltip title="Edit Team">
+        <IconButton onClick={() => setOpen(true)} color="primary">
+          <EditIcon />
+        </IconButton>
+      </Tooltip>
+
+      <Dialog
+        fullScreen={fullScreen}
+        maxWidth="lg"
+        fullWidth
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <DialogTitle sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Typography variant="h6" fontWeight={600}>
-            Team Details
+            Edit Team
           </Typography>
         </DialogTitle>
-        <DialogContent dividers>
-          {!team && <Typography>No team data available.</Typography>}
+
+        <DialogContent sx={{ p: 3 }}>
           {isLoading && (
             <Stack
-              direction={"row"}
+              direction="row"
               gap={2}
               alignItems="center"
               justifyContent="center"
-              padding={2}
+              height={200}
             >
               <CircularProgress />
-
-              <Typography>Loading team details...</Typography>
+              <Typography>Loading details...</Typography>
             </Stack>
           )}
+
           {error && (
-            <Typography color="error">Error loading team details.</Typography>
+            <Typography color="error" align="center" mt={4}>
+              Failed to load team data.
+            </Typography>
           )}
-          {team && <TeamDetailTable team={team} />}
+
+          {team && !isLoading && <TeamDetailContent team={team} />}
         </DialogContent>
+
+        <DialogActions sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
+          <Button
+            onClick={() => setOpen(false)}
+            variant="outlined"
+            color="inherit"
+          >
+            Close
+          </Button>
+        </DialogActions>
       </Dialog>
     </>
   );
 };
 
-const TeamDetailTable: React.FC<{ team: GetTeamsResponse | undefined }> = ({
-  team,
-}) => {
+export default EditTeamDialog;
+
+// --- 2. Content Layout Component ---
+const TeamDetailContent: React.FC<{ team: GetTeamsResponse }> = ({ team }) => {
   return (
-    <Box
-      sx={{
-        maxWidth: 2000,
-      }}
-    >
-      {team?.teamLeader && (
-        <Stack>
-          <Typography variant="body1">Team Leader</Typography>
-          <Stack direction={"row"} alignItems={"center"} gap={1}>
-            <EmojiPeopleIcon />
-            <Typography
-              variant="body1"
-              sx={{
-                textDecoration: "underline",
-              }}
-            >
-              {team.teamLeader.username}
-            </Typography>
+    <Stack spacing={4} mt={2}>
+      {/* Header Section: Name & Leader */}
+      <Paper elevation={0} variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+        <Stack spacing={2}>
+          <Typography variant="h4" fontWeight={700} color="primary">
+            {team.teamName}
+          </Typography>
+
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Avatar
+              {...stringAvatar(team.teamLeader?.username || "U")}
+              sx={{ width: 56, height: 56, bgcolor: "secondary.main" }}
+            />
+            <Box>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                textTransform="uppercase"
+                letterSpacing={1}
+              >
+                Team Leader
+              </Typography>
+              <Typography variant="h6" fontWeight={500}>
+                {team.teamLeader?.username || "N/A"}
+              </Typography>
+            </Box>
           </Stack>
         </Stack>
-      )}
-      <Stack direction={"row"} gap={2} marginTop={2} marginBottom={2}>
-        <Box>
-          <Typography variant="body1" marginBottom={1}>
-            Managers
-          </Typography>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 450 }} aria-label="team details table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Role</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>
-                    <Button endIcon={<AddIcon />}>Add Manager</Button>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {team?.managers?.map((manager) => (
-                  <TableRow
-                    key={manager.managerId}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      <Chip label="Manager" />
-                    </TableCell>
-                    <TableCell>{manager.managerName}</TableCell>
-                    <TableCell align="center">
-                      <IconButton color="error">
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-        <Box>
-          <Typography variant="body1" marginBottom={1}>
-            Members
-          </Typography>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 450 }} aria-label="team details table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Role</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>
-                    <Button endIcon={<AddIcon />}>Add Member</Button>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {team?.members?.map((member) => (
-                  <TableRow
-                    key={member.memberId}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      <Chip label="Member" />
-                    </TableCell>
-                    <TableCell>{member.memberName}</TableCell>
-                    <TableCell align="center">
-                      <IconButton color="error">
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
+      </Paper>
+
+      {/* Tables Section: Responsive Grid */}
+      <Grid container spacing={3}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6,
+          }}
+        >
+          <UserListTable
+            title="Managers"
+            roleLabel="Manager"
+            users={team.managers} // Passing the array
+            idKey="managerId" // Telling the component which field is the ID
+            nameKey="managerName" // Telling the component which field is the Name
+            teamId={team.teamId}
+            userType="manager"
+            teamName={team.teamName}
+          />
+        </Grid>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6,
+          }}
+        >
+          <UserListTable
+            title="Members"
+            roleLabel="Member"
+            users={team.members}
+            idKey="memberId"
+            nameKey="memberName"
+            teamId={team.teamId}
+            userType="member"
+            teamName={team.teamName}
+          />
+        </Grid>
+      </Grid>
+    </Stack>
+  );
+};
+
+// --- 3. Reusable User Table Component ---
+// This removes the duplicate code for Managers vs Members
+interface UserListTableProps {
+  title: string;
+  roleLabel: string;
+  users: any[] | undefined;
+  idKey: string;
+  nameKey: string;
+  teamId: string;
+  teamName: string;
+  userType: "manager" | "member";
+}
+
+const UserListTable: React.FC<UserListTableProps> = ({
+  title,
+  roleLabel,
+  users,
+  idKey,
+  nameKey,
+  teamId,
+  teamName,
+  userType,
+}) => {
+  return (
+    <Box>
+      {/* Header with Title and Add Button */}
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h6" fontWeight={600}>
+          {title}{" "}
+          <Chip size="small" label={users?.length || 0} sx={{ ml: 1 }} />
+        </Typography>
+
+        {/* The Add Dialog Wrapper */}
+        <AddUserDialog
+          teamId={teamId}
+          teamName={teamName}
+          type={userType}
+          // Assuming AddUserDialog has a trigger prop or you wrap a button
+          // If AddUserDialog renders a button internally, just render it here:
+        />
       </Stack>
+
+      <TableContainer
+        component={Paper}
+        variant="outlined"
+        sx={{ maxHeight: 300 }}
+      >
+        <Table stickyHeader size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: "bold" }}>Role</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {users && users.length > 0 ? (
+              users.map((user) => (
+                <TableRow key={user[idKey]} hover>
+                  <TableCell>
+                    <Chip
+                      label={roleLabel}
+                      size="small"
+                      color={userType === "manager" ? "warning" : "default"}
+                      variant="outlined"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{user[nameKey]}</Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <DeleteUserDialog
+                      role={userType}
+                      teamId={teamId}
+                      userId={user[idKey]}
+                      username={user[nameKey]}
+                      teamName={teamName}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={3}
+                  align="center"
+                  sx={{ py: 3, color: "text.secondary" }}
+                >
+                  No {title.toLowerCase()} found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 };
-export default EditTeamDialog;
