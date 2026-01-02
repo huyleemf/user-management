@@ -21,6 +21,7 @@ const GET_MANAGERS = gql`
     }
   }
 `;
+
 const GET_MEMBERS = gql`
   query GetMembers {
     users(role: MEMBER) {
@@ -31,4 +32,13 @@ const GET_MEMBERS = gql`
   }
 `;
 
-export { GET_USERS, GET_MANAGERS, GET_MEMBERS };
+const GET_USER_TEAM = gql`
+  query GetUserTeams($userId: ID!) {
+    teams(userId: $userId) {
+      teamId
+      teamName
+      rosterCount
+    }
+  }
+`;
+export { GET_USERS, GET_MANAGERS, GET_MEMBERS, GET_USER_TEAM };

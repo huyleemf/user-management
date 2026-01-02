@@ -1,5 +1,4 @@
 import React from "react";
-import type { GetTeamsResponse } from "../api/types";
 import {
   Avatar,
   AvatarGroup,
@@ -10,9 +9,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { stringAvatar } from "@/features/users/utils/utils";
+import { stringAvatar } from "@/shared/utils/utils";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import type { GetTeamsResponse } from "../../api/types";
 interface TeamCardProps {
   card: GetTeamsResponse;
 }

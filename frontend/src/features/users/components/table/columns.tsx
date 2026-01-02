@@ -13,7 +13,8 @@ import {
 import { type ColumnDef } from "@tanstack/react-table";
 import { Activity } from "react";
 import type { User } from "../../api/types";
-import { stringAvatar } from "../../utils/utils";
+import { stringAvatar } from "../../../../shared/utils/utils";
+import TeamDetailDialog from "../dialog/team-details";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -134,6 +135,12 @@ export const columns: ColumnDef<User>[] = [
           {new Date(row.original.createdAt)?.toLocaleDateString() ?? ""}
         </Typography>
       );
+    },
+  },
+  {
+    id: "teamDetails",
+    cell: ({ row }) => {
+      return <TeamDetailDialog userId={row.original.userId} />;
     },
   },
 ];

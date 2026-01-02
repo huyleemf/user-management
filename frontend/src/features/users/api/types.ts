@@ -13,5 +13,11 @@ export type UserByRole = {
   email: string;
 };
 
+export type UserTeam = {
+  teamId: string;
+  teamName: string;
+  rosterCount: number;
+};
+
 export type UserRole = "MANAGER" | "MEMBER";
 export const UserRoles = { MANAGER: "MANAGER", MEMBER: "MEMBER" };

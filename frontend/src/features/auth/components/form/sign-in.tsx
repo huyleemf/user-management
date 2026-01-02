@@ -11,7 +11,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { authActions } from "../redux/slice";
+import { authActions } from "../../redux/slice";
 import { enqueueSnackbar } from "notistack";
 
 const Card = styled(MuiCard)(({ theme }) => ({

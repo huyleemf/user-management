@@ -1,6 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { NAME } from "../keys";
-import { fetchUserReducers, fetchUsersByRoleReducers } from "./reducer";
+import {
+  fetchUserReducers,
+  fetchUsersByRoleReducers,
+  fetchUserTeamReducers,
+} from "./reducer";
 import { initialState } from "./types";
 
 const userSlice = createSlice({
@@ -9,6 +13,7 @@ const userSlice = createSlice({
   reducers: {
     ...fetchUserReducers,
     ...fetchUsersByRoleReducers,
+    ...fetchUserTeamReducers,
   },
 });
 export const userActions = userSlice.actions;

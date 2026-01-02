@@ -1,7 +1,7 @@
 import { apolloClient } from "@/apollo-client";
-import type { User } from "./types";
-import { GET_MANAGERS, GET_MEMBERS, GET_USERS } from "./queries";
 import { enqueueSnackbar } from "notistack";
+import { GET_MANAGERS, GET_MEMBERS, GET_USER_TEAM, GET_USERS } from "./queries";
+import type { User, UserTeam } from "./types";
 
 async function fetchUsers(role?: string): Promise<User[]> {
   try {
@@ -44,4 +44,20 @@ async function fetchMembers(): Promise<Partial<User>[]> {
   }
 }
 
-export { fetchUsers, fetchMembers, fetchManagers };
+async function fetchUserTeam(userId: string): Promise<UserTeam | null> {
+  try {
+    const { data } = await apolloClient.query<{ teams: UserTeam }>({
+      query: GET_USER_TEAM,
+      fetchPolicy: "no-cache",
+      variables: { userId },
+    });
+    console.log("cac" + data);
+    return data?.teams || null;
+  } catch (error) {
+    console.error(error);
+    enqueueSnackbar(error + "", { variant: "error" });
+    return Promise.reject(error);
+  }
+}
+
+export { fetchManagers, fetchMembers, fetchUsers, fetchUserTeam };

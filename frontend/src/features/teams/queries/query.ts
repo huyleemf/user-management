@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getTeams } from "../api";
+import { getTeam, getTeams } from "../api";
 import { QUERY } from "./keys";
 
 function useGetTeamsQuery() {
@@ -9,4 +9,12 @@ function useGetTeamsQuery() {
   });
 }
 
-export { useGetTeamsQuery };
+function useGetTeamByIdQuery(teamId: string, options?: { enabled: boolean }) {
+  return useQuery({
+    queryKey: QUERY.team(teamId),
+    queryFn: () => getTeam(teamId),
+    enabled: options?.enabled,
+  });
+}
+
+export { useGetTeamsQuery, useGetTeamByIdQuery };

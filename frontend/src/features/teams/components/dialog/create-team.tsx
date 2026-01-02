@@ -1,5 +1,5 @@
 import { userActions } from "@/features/users/redux/slice";
-import { a11yProps } from "@/features/users/utils/utils";
+import { a11yProps } from "@/shared/utils/utils";
 import type { AppDispatch, RootState } from "@/redux/store";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import GroupIcon from "@mui/icons-material/Group";
@@ -22,10 +22,10 @@ import {
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import type { CreateTeamRequest } from "../api/types";
-import { useCreateTeamMutation } from "../queries/mutation";
-import TabsPanel from "./tabs-panel";
+import type { CreateTeamRequest } from "../../api/types";
+import { useCreateTeamMutation } from "../../queries/mutation";
 import { enqueueSnackbar } from "notistack";
+import TabsPanel from "../others/tabs-panel";
 
 const CreateTeamDialog: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
@@ -113,7 +113,6 @@ const CreateTeamDialog: React.FC = () => {
   );
 
   const toggleOpen = () => setOpen(!open);
-  console.log(formData);
   return (
     <div>
       <Button

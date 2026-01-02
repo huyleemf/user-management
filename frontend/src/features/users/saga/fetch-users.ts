@@ -1,6 +1,6 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import { userActions } from "../redux/slice";
-import { fetchManagers, fetchMembers, fetchUsers } from "../api";
+import { fetchManagers, fetchMembers, fetchUsers, fetchUserTeam } from "../api";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { SagaIterator } from "redux-saga";
 
@@ -43,8 +43,25 @@ function* fetchManagersSaga(): SagaIterator {
   }
 }
 
+function* fetchUserTeamSaga(
+  action: PayloadAction<string | undefined>
+): SagaIterator {
+  try {
+    const userId = action.payload;
+    const users = yield call(fetchUserTeam, userId ?? "");
+    yield put(userActions.fetchUserTeamsSucceeded(users));
+  } catch (err: Error | any) {
+    yield put(
+      userActions.fetchUserTeamsFailed(
+        err?.message || "Failed to fetch users by role"
+      )
+    );
+  }
+}
+
 export function* watchFetchUsers() {
   yield takeLatest(userActions.fetchUsersRequested.type, fetchUsersSaga);
   yield takeLatest(userActions.fetchMembersRequested.type, fetchMembersSaga);
   yield takeLatest(userActions.fetchManagersRequested.type, fetchManagersSaga);
+  yield takeLatest(userActions.fetchUserTeamsRequested.type, fetchUserTeamSaga);
 }

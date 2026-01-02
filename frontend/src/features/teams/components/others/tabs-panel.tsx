@@ -3,7 +3,7 @@ import {
   type UserByRole,
   type UserRole,
 } from "@/features/users/api/types";
-import { stringAvatar } from "@/features/users/utils/utils";
+import { stringAvatar } from "@/shared/utils/utils";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
@@ -19,7 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useCallback } from "react";
-import type { CreateTeamRequest } from "../api/types";
+import type { CreateTeamRequest } from "../../api/types";
 
 interface TabPanelProps {
   users: UserByRole[];

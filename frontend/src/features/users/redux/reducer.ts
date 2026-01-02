@@ -61,3 +61,20 @@ export const fetchUsersByRoleReducers = {
     state.lastFetched = Date.now();
   },
 };
+
+export const fetchUserTeamReducers = {
+  fetchUserTeamsRequested(
+    state: UserState,
+    action: PayloadAction<string | undefined>
+  ) {
+    state.error = null;
+  },
+  fetchUserTeamsSucceeded(state: UserState, action: PayloadAction<any>) {
+    state.userTeam = action.payload;
+    state.lastFetched = Date.now();
+  },
+  fetchUserTeamsFailed(state: UserState, action: PayloadAction<string>) {
+    state.error = action.payload;
+    state.lastFetched = Date.now();
+  },
+};

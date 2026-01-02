@@ -1,19 +1,29 @@
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Grid, Stack, TextField } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import React, { useMemo, useState } from "react";
-import CreateTeamDialog from "../components/create-team.dialog";
-import TeamCard from "../components/team.card";
+import CreateTeamDialog from "../components/dialog/create-team";
 import { useGetTeamsQuery } from "../queries/query";
+import TeamCard from "../components/card/team";
 const Teams: React.FC = () => {
-  const { data: teams } = useGetTeamsQuery();
+  const { data: teams, isLoading } = useGetTeamsQuery();
   const [searchValue, setSearchValue] = useState("");
   const filteredTeams = useMemo(() => {
     if (!teams) return [];
-    return teams.filter((team) =>
-      team.teamName.toLowerCase().includes(searchValue.toLowerCase())
+    return (
+      !!teams &&
+      teams.length > 0 &&
+      teams.filter((team) =>
+        team.teamName.toLowerCase().includes(searchValue.toLowerCase())
+      )
     );
   }, [searchValue, teams]);
-  console.log(teams);
   return (
     <Box
       sx={{
@@ -50,6 +60,28 @@ const Teams: React.FC = () => {
           </Box>
         </Stack>
       </Box>
+      {isLoading && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: 4,
+          }}
+        >
+          <CircularProgress /> <Typography>Loading teams...</Typography>
+        </Box>
+      )}
+      {!!filteredTeams && filteredTeams.length === 0 && !isLoading && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: 4,
+          }}
+        >
+          <Typography> No teams found.</Typography>
+        </Box>
+      )}
       <Grid container spacing={2} sx={{ marginTop: 2 }}>
         {!!filteredTeams &&
           filteredTeams.length > 0 &&

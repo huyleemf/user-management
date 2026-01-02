@@ -1,4 +1,4 @@
-import { a11yProps } from "@/features/users/utils/utils";
+import { a11yProps } from "@/shared/utils/utils";
 import Person2Icon from "@mui/icons-material/Person2";
 import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
 import React, { useState } from "react";

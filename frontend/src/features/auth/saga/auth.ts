@@ -4,7 +4,7 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import { login } from "../api";
 import type { LoginResponse } from "../api/types";
 import { authActions } from "../redux/slice";
-import { storage } from "@/features/users/utils/storage";
+import { storage } from "@/shared/utils/storage";
 
 function* loginSaga(
   action: PayloadAction<{
