@@ -51,7 +51,6 @@ async function fetchUserTeam(userId: string): Promise<UserTeam | null> {
       fetchPolicy: "no-cache",
       variables: { userId },
     });
-    console.log("cac" + data);
     return data?.teams || null;
   } catch (error) {
     console.error(error);

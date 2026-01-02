@@ -38,7 +38,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ card }) => {
       />
       <CardContent sx={{ gap: 2, display: "flex", flexDirection: "column" }}>
         <Stack spacing={1} alignItems={"start"}>
-          <Typography variant="body1" color="textDisabled">
+          <Typography variant="body1" color="textSecondary">
             {card.members.length} Users:
           </Typography>
           <AvatarGroup total={card.members.length}>
@@ -51,7 +51,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ card }) => {
           </AvatarGroup>
         </Stack>
         <Stack spacing={1} alignItems={"start"}>
-          <Typography color="textDisabled" variant="body1">
+          <Typography color="textSecondary" variant="body1">
             {card.managers.length} Managers:
           </Typography>
           <AvatarGroup total={card.managers.length}>

@@ -17,13 +17,17 @@ async function getTeams(): Promise<GetTeamsResponse[]> {
         Authorization: `Bearer ${storage.get("accessToken") || ""}`,
       },
     });
+    const data = await response.json();
+
+    enqueueSnackbar(data.message || "Fetch Teams successfully", {
+      variant: !response.ok ? "error" : "success",
+    });
     if (!response.ok) {
       if (response.status === 401) {
         window.location.href = "/sign-in";
       }
       throw new Error(`Error fetching teams: ${response.statusText}`);
     }
-    const data = await response.json();
     return data;
   } catch (error) {
     console.error(error);
@@ -45,16 +49,19 @@ async function createTeam(
 
       body: JSON.stringify(formData),
     });
+    const data = await response.json();
+
+    enqueueSnackbar(data.message || "Create Team successfully", {
+      variant: !response.ok ? "error" : "success",
+    });
     if (!response.ok) {
       if (response.status === 401) {
         window.location.href = "/sign-in";
       }
       throw new Error(`Error creating team: ${response.statusText}`);
     }
-    const data = await response.json();
     return data;
   } catch (error) {
-    enqueueSnackbar(error + "", { variant: "error" });
     console.error(error);
     return Promise.reject(error);
   }
@@ -69,17 +76,20 @@ async function getTeam(teamId: string): Promise<GetTeamsResponse> {
         Authorization: `Bearer ${storage.get("accessToken") || ""}`,
       },
     });
+
+    const data = await response.json();
+    enqueueSnackbar(data.message || "Fetch Team successfully", {
+      variant: !response.ok ? "error" : "success",
+    });
     if (!response.ok) {
       if (response.status === 401) {
         window.location.href = "/sign-in";
       }
       throw new Error(`Error fetching team: ${response.statusText}`);
     }
-    const data = await response.json();
     return data;
   } catch (error) {
     console.error(error);
-    enqueueSnackbar(error + "", { variant: "error" });
     return Promise.reject(error);
   }
 }

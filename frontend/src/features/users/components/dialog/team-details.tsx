@@ -1,18 +1,29 @@
+import { useGetTeamByIdQuery } from "@/features/teams/queries/query";
 import type { AppDispatch, RootState } from "@/redux/store";
 import CloseIcon from "@mui/icons-material/Close";
 import {
+  Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   IconButton,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../../redux/slice";
-import { useGetTeamByIdQuery } from "@/features/teams/queries/query";
 interface TeamDetailDialogProps {
   userId: string;
 }
@@ -22,10 +33,6 @@ const TeamDetailDialog: React.FC<TeamDetailDialogProps> = ({ userId }) => {
 
   const { userTeam } = useSelector((state: RootState) => state.user);
 
-  const { data: teamData, isLoading } = useGetTeamByIdQuery(
-    userTeam?.teamId || "",
-    { enabled: open && !!userTeam?.teamId }
-  );
   useEffect(() => {
     if (!userId) return;
     if (!open) return;
@@ -46,7 +53,7 @@ const TeamDetailDialog: React.FC<TeamDetailDialogProps> = ({ userId }) => {
       </Button>
       <Dialog onClose={handleClose} open={open}>
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-          Modal title
+          Team Details
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -61,29 +68,108 @@ const TeamDetailDialog: React.FC<TeamDetailDialogProps> = ({ userId }) => {
           <CloseIcon />
         </IconButton>
         <DialogContent dividers>
-          <Typography gutterBottom>
-            Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-            dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
-            ac consectetur ac, vestibulum at eros.
-          </Typography>
-          <Typography gutterBottom>
-            Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
-            Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor
-            auctor.
-          </Typography>
-          <Typography gutterBottom>
-            Aenean lacinia bibendum nulla sed consectetur. Praesent commodo
-            cursus magna, vel scelerisque nisl consectetur et. Donec sed odio
-            dui. Donec ullamcorper nulla non metus auctor fringilla.
-          </Typography>
+          {(!userTeam || userTeam.length === 0) && (
+            <Stack>
+              <Typography>No team data available.</Typography>
+            </Stack>
+          )}
+          {!!userTeam &&
+            userTeam.length > 0 &&
+            userTeam.map((team, index) => (
+              <Box key={team.teamId} marginBottom={2}>
+                <Stack>
+                  <Typography variant="h6" fontWeight={600}>
+                    {team.teamName}
+                  </Typography>
+                  <Typography
+                    gutterBottom
+                    variant="subtitle1"
+                    color="textSecondary"
+                  >
+                    Roster Count : {team.rosterCount}
+                  </Typography>
+                </Stack>
+                <TeamDetailTable teamId={team.teamId} />
+                {index % 2 == 0 && <Divider sx={{ marginTop: 2 }} />}
+              </Box>
+            ))}
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={handleClose}>
-            Save changes
+            OK !
           </Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
+  );
+};
+
+const TeamDetailTable: React.FC<{ teamId: string }> = ({ teamId }) => {
+  const { data: team, error, isLoading } = useGetTeamByIdQuery(teamId);
+  if (isLoading) {
+    return (
+      <Stack
+        direction={"row"}
+        gap={2}
+        alignItems="center"
+        justifyContent="center"
+        padding={2}
+      >
+        <CircularProgress />
+
+        <Typography>Loading team details...</Typography>
+      </Stack>
+    );
+  }
+  if (error) {
+    return <Typography color="error">Error loading team details.</Typography>;
+  }
+
+  return (
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 450 }} aria-label="team details table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Role</TableCell>
+            <TableCell>Name</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {team?.teamLeader && (
+            <TableRow
+              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                Team Leader
+              </TableCell>
+              <TableCell>{team.teamLeader.username}</TableCell>
+            </TableRow>
+          )}
+          {team?.managers?.map((manager) => (
+            <TableRow
+              key={manager.managerId}
+              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                Manager
+              </TableCell>
+              <TableCell>{manager.managerName}</TableCell>
+            </TableRow>
+          ))}
+          {team?.members?.map((member) => (
+            <TableRow
+              key={member.memberId}
+              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                Member
+              </TableCell>
+              <TableCell>{member.memberName}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

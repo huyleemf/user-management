@@ -13,7 +13,7 @@ function useGetTeamByIdQuery(teamId: string, options?: { enabled: boolean }) {
   return useQuery({
     queryKey: QUERY.team(teamId),
     queryFn: () => getTeam(teamId),
-    enabled: options?.enabled,
+    enabled: options?.enabled && !!teamId,
   });
 }
 

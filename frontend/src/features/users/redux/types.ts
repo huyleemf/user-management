@@ -4,7 +4,7 @@ export interface UserState {
   users: User[];
   managers: UserByRole[];
   members: UserByRole[];
-  userTeam: UserTeam | null;
+  userTeam: UserTeam[];
   loading: boolean;
   error: string | null;
   lastFetched: number | null;
@@ -14,7 +14,7 @@ export const initialState: UserState = {
   users: [],
   managers: [],
   members: [],
-  userTeam: null,
+  userTeam: [],
   loading: false,
   error: null,
   lastFetched: null,
