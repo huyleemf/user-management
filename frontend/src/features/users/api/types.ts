@@ -18,6 +18,12 @@ export type UserTeam = {
   teamName: string;
   rosterCount: number;
 };
+export type UserTeams = {
+  teamId: string;
+  teamName: string;
+  rosterCount: number;
+  createdAt: Date;
+};
 
 export type UserRole = "MANAGER" | "MEMBER";
 export const UserRoles = { MANAGER: "MANAGER", MEMBER: "MEMBER" };

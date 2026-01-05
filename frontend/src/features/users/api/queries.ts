@@ -41,4 +41,13 @@ const GET_USER_TEAM = gql`
     }
   }
 `;
-export { GET_USERS, GET_MANAGERS, GET_MEMBERS, GET_USER_TEAM };
+const GET_USER_TEAMS = gql`
+  query GetUserTeams($userId: ID!) {
+    teams(userId: $userId) {
+      teamId
+      teamName
+      rosterCount
+    }
+  }
+`;
+export { GET_USERS, GET_MANAGERS, GET_MEMBERS, GET_USER_TEAM, GET_USER_TEAMS };

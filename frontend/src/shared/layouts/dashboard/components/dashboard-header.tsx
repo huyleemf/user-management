@@ -5,6 +5,7 @@ import { storage } from "@/shared/utils/storage";
 import { a11yProps, stringAvatar } from "@/shared/utils/utils";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Person2Icon from "@mui/icons-material/Person2";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import {
   Avatar,
   Box,
@@ -14,40 +15,50 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import GroupsIcon from "@mui/icons-material/Groups";
+
 const DashboardHeader: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const location = useLocation().pathname;
   const user: User | null = storage.get("user");
-  const [value, setValue] = useState<number>(() =>
-    location === "/members"
-      ? 0
-      : location === "/managers"
-      ? 1
-      : location === "/teams"
-      ? 2
-      : 0
-  );
 
+  const [value, setValue] = useState<number>(1);
+  useEffect(() => {
+    if (location === "/" || location === "/dashboard") {
+      setValue(0);
+    } else if (location === "/members") {
+      setValue(1);
+    } else if (location === "/managers") {
+      setValue(2);
+    } else if (location === "/teams") {
+      setValue(3);
+    } else {
+      setValue(0);
+    }
+  }, [location]);
   const handleLogout = () => {
     dispatch(authActions.logout());
     navigate("/sign-in");
   };
+
   const handleChange = (newValue: number) => {
     setValue(newValue);
     switch (newValue) {
       case 0:
-        navigate("/members");
+        navigate("/dashboard");
         break;
       case 1:
-        navigate("/managers");
+        navigate("/members");
         break;
       case 2:
+        navigate("/managers");
+        break;
+      case 3:
         navigate("/teams");
         break;
       default:
@@ -89,21 +100,8 @@ const DashboardHeader: React.FC = () => {
           <Tab
             label={
               <Stack direction={"row"} alignItems={"center"} gap={1}>
-                <Person2Icon />
-                <Typography>Members</Typography>
-                {/* <Chip
-                  label={loading ? "..." : members.length}
-                  sx={{
-                    height: "fit-content",
-                  }}
-                  slotProps={{
-                    label: {
-                      style: {
-                        padding: "0 6px",
-                      },
-                    },
-                  }}
-                /> */}
+                <DashboardIcon />
+                <Typography>Dashboard</Typography>
               </Stack>
             }
             {...a11yProps(0)}
@@ -111,21 +109,8 @@ const DashboardHeader: React.FC = () => {
           <Tab
             label={
               <Stack direction={"row"} alignItems={"center"} gap={1}>
-                <EngineeringIcon />
-                <Typography>Managers</Typography>
-                {/* <Chip
-                  label={loading ? "..." : managers.length}
-                  sx={{
-                    height: "fit-content",
-                  }}
-                  slotProps={{
-                    label: {
-                      style: {
-                        padding: "0 6px",
-                      },
-                    },
-                  }}
-                /> */}
+                <Person2Icon />
+                <Typography>Members</Typography>
               </Stack>
             }
             {...a11yProps(1)}
@@ -133,24 +118,20 @@ const DashboardHeader: React.FC = () => {
           <Tab
             label={
               <Stack direction={"row"} alignItems={"center"} gap={1}>
-                <GroupsIcon />
-                <Typography>Teams</Typography>
-                {/* <Chip
-                  label={loading ? "..." : managers.length}
-                  sx={{
-                    height: "fit-content",
-                  }}
-                  slotProps={{
-                    label: {
-                      style: {
-                        padding: "0 6px",
-                      },
-                    },
-                  }}
-                /> */}
+                <EngineeringIcon />
+                <Typography>Managers</Typography>
               </Stack>
             }
             {...a11yProps(2)}
+          />
+          <Tab
+            label={
+              <Stack direction={"row"} alignItems={"center"} gap={1}>
+                <GroupsIcon />
+                <Typography>Teams</Typography>
+              </Stack>
+            }
+            {...a11yProps(3)}
           />
         </Tabs>
       </Box>

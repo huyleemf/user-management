@@ -3,25 +3,26 @@ import { createBrowserRouter } from "react-router";
 import DashboardLayout from "./shared/layouts/dashboard";
 
 const SignIn = lazy(() => import("./features/auth/pages/sign-in"));
+const Dashboard = lazy(() => import("./features/users/pages/dashboard"));
 const MemberTable = lazy(() => import("./features/users/pages/member.table"));
 const ManagerTable = lazy(() => import("./features/users/pages/manager.table"));
 const Teams = lazy(() => import("./features/teams/pages/teams"));
+
 const router = createBrowserRouter([
   {
+    path: "/",
     Component: DashboardLayout,
-    children: [{ path: "/members", element: <MemberTable /> }],
-  },
-  {
-    Component: DashboardLayout,
-    children: [{ path: "/managers", element: <ManagerTable /> }],
+    children: [
+      { index: true, element: <Dashboard /> },
+      { path: "dashboard", element: <Dashboard /> },
+      { path: "members", element: <MemberTable /> },
+      { path: "managers", element: <ManagerTable /> },
+      { path: "teams", element: <Teams /> },
+    ],
   },
   {
     path: "/sign-in",
     element: <SignIn />,
-  },
-  {
-    Component: DashboardLayout,
-    children: [{ path: "/teams", element: <Teams /> }],
   },
 ]);
 
