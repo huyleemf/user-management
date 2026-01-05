@@ -18,20 +18,16 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import type { GetTeamsResponse } from "../../api/types";
 import { useAddUserToTeamMutation } from "../../queries/mutation";
 export type AddUserDialogType = "member" | "manager";
 
 interface AddUserDialogProps {
   type: AddUserDialogType;
-  teamId: string;
-  teamName?: string;
+  team: GetTeamsResponse;
 }
 
-const AddUserDialog: React.FC<AddUserDialogProps> = ({
-  type,
-  teamId,
-  teamName,
-}) => {
+const AddUserDialog: React.FC<AddUserDialogProps> = ({ type, team }) => {
   const dispatch = useDispatch<AppDispatch>();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<{ userId: string; username: string }>({
@@ -40,7 +36,6 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({
   });
 
   const { managers, members } = useSelector((state: RootState) => state.user);
-
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -53,7 +48,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     mutate({
-      teamId,
+      teamId: team.teamId,
       userId: user.userId,
       username: user.username,
       role: type,
@@ -64,7 +59,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({
   const isMemberType = type === "member";
   const label = isMemberType ? "Member" : "Manager";
   const userList = isMemberType ? members : managers;
-  const targetTeam = teamName ?? "This Team";
+  const targetTeam = team.teamName ?? "This Team";
   useEffect(() => {
     if (type === "member") {
       dispatch(userActions.fetchMembersRequested());
@@ -77,12 +72,7 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({
       <Button endIcon={<AddIcon />} onClick={handleClickOpen}>
         Add {type == "member" ? "Member" : "Manager"}
       </Button>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        maxWidth="md" // 2. Use maxWidth instead of hardcoded pixels
-        fullWidth
-      >
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle>Add User to {targetTeam}</DialogTitle>
 
         <DialogContent dividers>
@@ -93,12 +83,11 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({
 
           <form id="subscription-form" onSubmit={handleSubmit}>
             <Stack
-              direction={"row"} // 3. Responsive layout
+              direction={"row"}
               alignItems="center"
               spacing={2}
               justifyContent="space-between"
             >
-              {/* Source: User Selection */}
               <FormControl fullWidth>
                 <Autocomplete
                   options={type === "member" ? members : managers}

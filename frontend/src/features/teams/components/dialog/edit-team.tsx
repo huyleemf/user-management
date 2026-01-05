@@ -30,12 +30,11 @@ import type { GetTeamsResponse } from "../../api/types";
 import { useGetTeamByIdQuery } from "../../queries/query";
 import AddUserDialog from "./add-user";
 import DeleteUserDialog from "./del-user";
+import { useAuthorization } from "@/shared/utils/roles";
 
-// --- 1. Main Dialog Component ---
 const EditTeamDialog: React.FC<{ teamId: string }> = ({ teamId }) => {
   const [open, setOpen] = useState(false);
   const theme = useTheme();
-  // Full screen on mobile for better UX
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const {
@@ -47,7 +46,7 @@ const EditTeamDialog: React.FC<{ teamId: string }> = ({ teamId }) => {
   return (
     <>
       <Tooltip title="Edit Team">
-        <IconButton onClick={() => setOpen(true)} color="primary">
+        <IconButton onClick={() => setOpen(true)}>
           <EditIcon />
         </IconButton>
       </Tooltip>
@@ -104,11 +103,9 @@ const EditTeamDialog: React.FC<{ teamId: string }> = ({ teamId }) => {
 
 export default EditTeamDialog;
 
-// --- 2. Content Layout Component ---
 const TeamDetailContent: React.FC<{ team: GetTeamsResponse }> = ({ team }) => {
   return (
     <Stack spacing={4} mt={2}>
-      {/* Header Section: Name & Leader */}
       <Paper elevation={0} variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
         <Stack spacing={2}>
           <Typography variant="h4" fontWeight={700} color="primary">
@@ -148,12 +145,11 @@ const TeamDetailContent: React.FC<{ team: GetTeamsResponse }> = ({ team }) => {
           <UserListTable
             title="Managers"
             roleLabel="Manager"
-            users={team.managers} // Passing the array
-            idKey="managerId" // Telling the component which field is the ID
-            nameKey="managerName" // Telling the component which field is the Name
-            teamId={team.teamId}
+            users={team.managers}
+            idKey="managerId"
+            nameKey="managerName"
+            team={team}
             userType="manager"
-            teamName={team.teamName}
           />
         </Grid>
         <Grid
@@ -168,9 +164,8 @@ const TeamDetailContent: React.FC<{ team: GetTeamsResponse }> = ({ team }) => {
             users={team.members}
             idKey="memberId"
             nameKey="memberName"
-            teamId={team.teamId}
             userType="member"
-            teamName={team.teamName}
+            team={team}
           />
         </Grid>
       </Grid>
@@ -178,17 +173,14 @@ const TeamDetailContent: React.FC<{ team: GetTeamsResponse }> = ({ team }) => {
   );
 };
 
-// --- 3. Reusable User Table Component ---
-// This removes the duplicate code for Managers vs Members
 interface UserListTableProps {
   title: string;
   roleLabel: string;
   users: any[] | undefined;
   idKey: string;
   nameKey: string;
-  teamId: string;
-  teamName: string;
   userType: "manager" | "member";
+  team: GetTeamsResponse;
 }
 
 const UserListTable: React.FC<UserListTableProps> = ({
@@ -197,13 +189,14 @@ const UserListTable: React.FC<UserListTableProps> = ({
   users,
   idKey,
   nameKey,
-  teamId,
-  teamName,
   userType,
+  team,
 }) => {
+  const { canAddMember, canAddManager, canRemoveManager, canRemoveMember } =
+    useAuthorization();
+
   return (
     <Box>
-      {/* Header with Title and Add Button */}
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -215,14 +208,9 @@ const UserListTable: React.FC<UserListTableProps> = ({
           <Chip size="small" label={users?.length || 0} sx={{ ml: 1 }} />
         </Typography>
 
-        {/* The Add Dialog Wrapper */}
-        <AddUserDialog
-          teamId={teamId}
-          teamName={teamName}
-          type={userType}
-          // Assuming AddUserDialog has a trigger prop or you wrap a button
-          // If AddUserDialog renders a button internally, just render it here:
-        />
+        {(userType === "member" ? canAddMember(team) : canAddManager(team)) && (
+          <AddUserDialog team={team} type={userType} />
+        )}
       </Stack>
 
       <TableContainer
@@ -256,13 +244,17 @@ const UserListTable: React.FC<UserListTableProps> = ({
                     <Typography variant="body2">{user[nameKey]}</Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <DeleteUserDialog
-                      role={userType}
-                      teamId={teamId}
-                      userId={user[idKey]}
-                      username={user[nameKey]}
-                      teamName={teamName}
-                    />
+                    {(userType === "member"
+                      ? canRemoveMember(team)
+                      : canRemoveManager(team, user[idKey])) && (
+                      <DeleteUserDialog
+                        role={userType}
+                        teamId={team.teamId}
+                        userId={user[idKey]}
+                        username={user[nameKey]}
+                        teamName={team.teamName}
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               ))

@@ -1,12 +1,10 @@
 import { stringAvatar } from "@/shared/utils/utils";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Avatar,
   AvatarGroup,
   Card,
   CardContent,
   CardHeader,
-  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -23,14 +21,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ card }) => {
         sx={{
           paddingBlockEnd: 0,
         }}
-        action={
-          <Stack direction="row" spacing={1}>
-            <EditTeamDialog teamId={card.teamId} />
-            <IconButton>
-              <DeleteIcon />
-            </IconButton>
-          </Stack>
-        }
+        action={<EditTeamDialog teamId={card.teamId} />}
         title={<Typography variant="h6">{card.teamName}</Typography>}
         subheader={`Team Leader: ${card.teamLeader.username}`}
       />
