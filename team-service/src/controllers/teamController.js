@@ -28,20 +28,20 @@ const createTeam = async (req, res, next) => {
         throw err;
       } else if (!isTeamFound) {
         const newTeam = await trx("Teams")
-          .insert({ teamName })
+          .insert({
+            teamName,
+            createdAt: trx.fn.now(),
+            updatedAt: trx.fn.now(),
+          })
           .returning(["teamId", "teamName"]);
 
-        console.log(newTeam);
-
-        const newLeader = await trx("Rosters")
+        await trx("Rosters")
           .insert({
             teamId: newTeam[0].teamId,
             userId: userId,
             isLeader: true,
           })
           .returning(["teamId", "isLeader", "userId"]);
-
-        console.log(newLeader);
 
         const managerList = await processArray(
           trx,

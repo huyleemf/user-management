@@ -25,7 +25,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { Activity, useState } from "react";
 import type { GetTeamsResponse } from "../../api/types";
 import { useGetTeamByIdQuery } from "../../queries/query";
 import AddUserDialog from "./add-user";
@@ -208,9 +208,14 @@ const UserListTable: React.FC<UserListTableProps> = ({
           <Chip size="small" label={users?.length || 0} sx={{ ml: 1 }} />
         </Typography>
 
-        {(userType === "member" ? canAddMember(team) : canAddManager(team)) && (
-          <AddUserDialog team={team} type={userType} />
-        )}
+        <Activity
+          mode={
+            (userType === "member" ? canAddMember(team) : canAddManager(team))
+              ? "visible"
+              : "hidden"
+          }
+          children={<AddUserDialog team={team} type={userType} />}
+        />
       </Stack>
 
       <TableContainer
@@ -244,17 +249,26 @@ const UserListTable: React.FC<UserListTableProps> = ({
                     <Typography variant="body2">{user[nameKey]}</Typography>
                   </TableCell>
                   <TableCell align="right">
-                    {(userType === "member"
-                      ? canRemoveMember(team)
-                      : canRemoveManager(team, user[idKey])) && (
-                      <DeleteUserDialog
-                        role={userType}
-                        teamId={team.teamId}
-                        userId={user[idKey]}
-                        username={user[nameKey]}
-                        teamName={team.teamName}
-                      />
-                    )}
+                    <Activity
+                      mode={
+                        (
+                          userType === "member"
+                            ? canRemoveMember(team)
+                            : canRemoveManager(team, user[idKey])
+                        )
+                          ? "visible"
+                          : "hidden"
+                      }
+                      children={
+                        <DeleteUserDialog
+                          role={userType}
+                          teamId={team.teamId}
+                          userId={user[idKey]}
+                          username={user[nameKey]}
+                          teamName={team.teamName}
+                        />
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ))

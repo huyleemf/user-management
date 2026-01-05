@@ -30,6 +30,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "username", desc: true },
+    { id: "createdAt", desc: true },
   ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -58,7 +59,6 @@ export function DataTable<TData, TValue>({
       },
     },
   });
-
   return (
     <div className="grid gap-4">
       {/* Table */}

@@ -7,16 +7,18 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useMemo, useState } from "react";
+import React, { Activity, useMemo, useState } from "react";
 import CreateTeamDialog from "../components/dialog/create-team";
 import { useGetTeamsQuery } from "../queries/query";
 import TeamCard from "../components/card/team";
 import type { User } from "@/features/users/api/types";
 import { storage } from "@/shared/utils/storage";
+import { useAuthorization } from "@/shared/utils/roles";
 const Teams: React.FC = () => {
   const { data: teams, isLoading } = useGetTeamsQuery();
   const user: User | null = storage.get("user");
   const [searchValue, setSearchValue] = useState("");
+  const { isMember } = useAuthorization();
   const filteredTeams = useMemo(() => {
     if (!teams) return [];
     return (
@@ -45,7 +47,10 @@ const Teams: React.FC = () => {
     >
       <Box>
         <Stack direction="row" alignContent={"center"} gap={2}>
-          <CreateTeamDialog />
+          <Activity
+            mode={!isMember ? "visible" : "hidden"}
+            children={<CreateTeamDialog />}
+          />
           <Box>
             <TextField
               value={searchValue}
