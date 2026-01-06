@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { createBrowserRouter } from "react-router";
 import DashboardLayout from "./shared/layouts/dashboard";
+import { RootErrorBoundary } from "./ErrorBoundary";
 
 const SignIn = lazy(() => import("./features/auth/pages/sign-in"));
 const Dashboard = lazy(() => import("./features/users/pages/dashboard"));
@@ -11,6 +12,7 @@ const Teams = lazy(() => import("./features/teams/pages/teams"));
 const router = createBrowserRouter([
   {
     path: "/",
+    errorElement: <RootErrorBoundary />,
     Component: DashboardLayout,
     children: [
       { index: true, element: <Dashboard /> },
