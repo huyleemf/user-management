@@ -1,10 +1,10 @@
 import { lazy } from "react";
 import { createBrowserRouter } from "react-router";
 
-const SignIn = lazy(() => import("./features/auth/pages/sign-in"));
-const MemberTable = lazy(() => import("./features/users/pages/member.table"));
-const ManagerTable = lazy(() => import("./features/users/pages/manager.table"));
-const Teams = lazy(() => import("./features/teams/pages/teams"));
+const SignIn = lazy(() => import("./pages/auth"));
+const MemberTable = lazy(() => import("./pages/users/members"));
+const ManagerTable = lazy(() => import("./pages/users/managers"));
+const Teams = lazy(() => import("./pages/teams"));
 const router = createBrowserRouter([
   {
     path: "/members",
