@@ -5,12 +5,14 @@ Hands-on exercises for integrating User Service (GraphQL) and Team Service (REST
 ## 📋 Prerequisites
 
 Before starting these exercises:
+
 - ✅ PostgreSQL database running (via Docker or local)
 - ✅ User Service running on `http://localhost:4000`
 - ✅ Team Service running on `http://localhost:5000`
 - ✅ Database seeded with test data
 
 **Check services are running:**
+
 ```bash
 # Terminal 1 - User Service
 cd user-service && yarn start
@@ -37,6 +39,7 @@ cd team-service && yarn start
 ## Exercise 1: User Authentication
 
 ### 🎯 Objective
+
 Create a complete authentication flow with login, token management, and logout functionality.
 
 ### � APIs Used
@@ -62,6 +65,7 @@ mutation Login($email: String!, $password: String!) {
 ```
 
 **Example Variables:**
+
 ```json
 {
   "email": "manager1@example.com",
@@ -72,12 +76,14 @@ mutation Login($email: String!, $password: String!) {
 ### �📝 Requirements
 
 1. **Login Form**
+
    - Email and password inputs with validation
    - Show error messages for invalid credentials
    - Loading state during authentication
    - Success message after login
 
 2. **Token Management**
+
    - Store access token in sessionStorage/localStorage/...
    - Store refresh token as httpOnly cookie (automatic)
    - Store user info in Redux state
@@ -92,6 +98,7 @@ mutation Login($email: String!, $password: String!) {
 **Task 1.1: Create GraphQL Login Mutation**
 
 **Hints:**
+
 - Import `GraphQLClient` from 'graphql-request'
 - Create a client instance with the GraphQL endpoint from environment variables
 - Set `credentials: 'include'` to handle cookies for refresh tokens
@@ -101,11 +108,13 @@ mutation Login($email: String!, $password: String!) {
 **Task 1.2: Create Login Component**
 
 **Hints:**
+
 - Use redux action to handle this flow.
 
 **Task 1.3: Implement Logout**
 
 **Hints:**
+
 - Create a `logout()` action creator
 - Clear access token from sessionStorage/localStorage/...
 - Return action with type 'LOGOUT' to clear Redux state
@@ -130,6 +139,7 @@ mutation Login($email: String!, $password: String!) {
 ## Exercise 2: Display User Lists
 
 ### 🎯 Objective
+
 Fetch and display lists of managers and members with filtering and search capabilities.
 
 ### � APIs Used
@@ -150,6 +160,7 @@ query GetUsers($role: UserType!) {
 ```
 
 **Example Variables for Managers:**
+
 ```json
 {
   "role": "MANAGER"
@@ -157,6 +168,7 @@ query GetUsers($role: UserType!) {
 ```
 
 **Example Variables for Members:**
+
 ```json
 {
   "role": "MEMBER"
@@ -166,12 +178,14 @@ query GetUsers($role: UserType!) {
 ### �📝 Requirements
 
 1. **Managers Page**
+
    - Fetch all managers from GraphQL API
    - Display in a table using TanStack Table
    - Show: username, email, createdAt,...
    - Loading and error states
 
 2. **Members Page**
+
    - Fetch all members from GraphQL API
    - Display in a table/grid using TanStack Table
    - Show: username, email, createdAt,...
@@ -186,6 +200,7 @@ query GetUsers($role: UserType!) {
 **Task 2.1: Create GraphQL Queries**
 
 **Hints:**
+
 - Write a GET_USERS_QUERY that accepts a `$role` variable of type `UserType!`
 - Request fields: userId, username, email, role, createdAt
 - Create `fetchUsers(role)` async function
@@ -198,14 +213,13 @@ query GetUsers($role: UserType!) {
 
 ### ✅ Acceptance Criteria
 
-- [ ] Managers page displays all managers
-- [ ] Members page displays all members
-- [ ] Loading state shows while fetching
-- [ ] Error state shows if fetch fails
-- [ ] Search filters users by username/email
-- [ ] Data displays username, email, and creation date
-- [ ] Dates are formatted nicely (use toLocaleDateString)
-
+- [x] Managers page displays all managers
+- [x] Members page displays all members
+- [x] Loading state shows while fetching
+- [x] Error state shows if fetch fails
+- [x] Search filters users by username/email
+- [x] Data displays username, email, and creation date
+- [x] Dates are formatted nicely (use toLocaleDateString)
 
 ### 📚 Resources
 
@@ -216,6 +230,7 @@ query GetUsers($role: UserType!) {
 ## Exercise 3: Create Team Form
 
 ### 🎯 Objective
+
 Create a form to create new teams by selecting managers and members from existing users.
 
 ### � APIs Used
@@ -267,6 +282,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Team created successfully",
@@ -284,12 +300,14 @@ Content-Type: application/json
 ### �📝 Requirements
 
 1. **Form Fields**
+
    - Team name input (required, min 1 char)
    - Multi-select for managers (fetch from GraphQL)
    - Multi-select for members (fetch from GraphQL)
    - Submit button (disabled if invalid)
 
 2. **Data Flow**
+
    - Fetch managers list from User Service (GraphQL)
    - Fetch members list from User Service (GraphQL)
    - Submit to Team Service (REST)
@@ -306,11 +324,9 @@ Content-Type: application/json
 
 **Hints:** Create React query to CRUD team APIs
 
-
 **Task 3.2: Create Team Form Component**
 
 **Task 3.3: Add to Teams Page**
-
 
 ### ✅ Acceptance Criteria
 
@@ -342,6 +358,7 @@ Content-Type: application/json
 ## Exercise 4: Team Details Page
 
 ### 🎯 Objective
+
 Display comprehensive team information including team leader, managers, and members.
 
 ### 🔌 APIs Used
@@ -359,6 +376,7 @@ query GetUserTeams($userId: ID!) {
 ```
 
 **Example Variables:**
+
 ```json
 {
   "userId": "current-user-id"
@@ -373,6 +391,7 @@ Authorization: Bearer {accessToken}
 ```
 
 **Response:**
+
 ```json
 {
   "team": {
@@ -402,6 +421,7 @@ Authorization: Bearer {accessToken}
 ### 📝 Requirements
 
 1. **Team Information Display**
+
    - Team name and ID
    - Team leader info
    - List of managers with names
@@ -409,6 +429,7 @@ Authorization: Bearer {accessToken}
    - Total counts
 
 2. **User Details Enhancement**
+
    - For each user, show role badge
    - Highlight team leader
    - Show member status (manager/member)
@@ -423,6 +444,7 @@ Authorization: Bearer {accessToken}
 **Task 4.1: Create Team Details Component**
 
 **Hints:**
+
 - Use `useParams()` to get teamId from URL
 - Call REST API `getTeam(teamId)`
 - Handle error responses: 400 for unauthorized, 404 for not found
@@ -460,13 +482,14 @@ Authorization: Bearer {accessToken}
 ## Exercise 5: Add/Remove Members
 
 ### 🎯 Objective
+
 Implement functionality to add and remove members/managers from a team with proper authorization checks.
 
 ### � APIs Used
 
 **1. User Service (GraphQL) - Get Available Users**
 
-```graphql
+````graphql
 # Get all members (for add member modal)
 query GetMembers {
   users(role: MEMBER) {
@@ -496,7 +519,7 @@ Content-Type: application/json
   "memberId": "uuid-here",
   "memberName": "John Doe"
 }
-```
+````
 
 **3. Team Service (REST) - Remove Member**
 
@@ -528,12 +551,14 @@ Authorization: Bearer {accessToken}
 ### �📝 Requirements
 
 1. **Add Member Feature**
+
    - Button to add member (managers only)
    - Modal/form to select member
    - Exclude users already in team
    - Update UI after successful add
 
 2. **Remove Member Feature**
+
    - Remove button next to each member (managers only)
    - Confirmation dialog
    - Update UI after successful remove
@@ -549,6 +574,7 @@ Authorization: Bearer {accessToken}
 **Task 5.1: Create Add Member Modal**
 
 **Hints:**
+
 - Create modal overlay with:
   - Select dropdown showing username and email
   - Add button (disabled if no user selected or loading)
@@ -558,6 +584,7 @@ Authorization: Bearer {accessToken}
 **Task 5.2: Create Remove Confirmation Dialog**
 
 **Hints:**
+
 - Show title, message text, and action buttons
 - Two buttons: "Cancel" and "Confirm"
 - Disable both buttons while loading is true
@@ -581,12 +608,12 @@ Authorization: Bearer {accessToken}
 - [ ] Loading states during operations
 - [ ] Cannot remove team leader
 
-
 ---
 
 ## Exercise 6: Team Management Dashboard
 
 ### 🎯 Objective
+
 Create a comprehensive dashboard showing team statistics, recent activity, and quick actions.
 
 ### � APIs Used
@@ -612,6 +639,7 @@ Authorization: Bearer {accessToken}
 ```
 
 **Note:** You can fetch all team details to calculate:
+
 - Total teams count
 - Teams where user is leader
 - Total members managed (sum of all roster members)
@@ -619,6 +647,7 @@ Authorization: Bearer {accessToken}
 - Average team size
 
 **Example Flow:**
+
 1. Fetch all teams using GraphQL
 2. For detailed stats, optionally fetch each team's full details via REST
 3. Calculate statistics from the combined data
@@ -626,12 +655,14 @@ Authorization: Bearer {accessToken}
 ### �📝 Requirements
 
 1. **Dashboard Overview**
+
    - Total teams count
    - Teams where user is leader
    - Total members managed
    - Recent teams
 
 2. **Team Statistics**
+
    - Largest team (most members)
    - Teams by role (leader vs member)
    - Average team size
@@ -646,6 +677,7 @@ Authorization: Bearer {accessToken}
 **Task 6.1: Create Dashboard Component**
 
 **Hints:**
+
 - Get current user from Redux
 - Use useState for: teams array, stats object, loading, error
 - In `loadDashboardData()`:
@@ -665,6 +697,7 @@ Authorization: Bearer {accessToken}
 **Task 6.2: Create Stats Card Component**
 
 **Hints:**
+
 - Use Tailwind CSS for card styling
 - Card structure:
   - Icon (emoji or SVG) in colored circle
@@ -678,6 +711,7 @@ Authorization: Bearer {accessToken}
 **Task 6.3: Add Quick Actions**
 
 **Hints:**
+
 - Add "Quick Actions" section to Dashboard
 - Show action buttons:
   - "Create New Team" (only for MANAGER role)
@@ -703,10 +737,11 @@ Authorization: Bearer {accessToken}
 ## Exercise 7: Role-Based Features
 
 ### 🎯 Objective
+
 Implement proper role-based UI rendering and authorization checks.
 
-
 **Key Data Points:**
+
 - `user.role` - from Redux state (MANAGER or MEMBER)
 - `team.teamLeader.userId` - from team details API
 - Compare `user.userId === team.teamLeader.userId` for leadership check
@@ -714,11 +749,13 @@ Implement proper role-based UI rendering and authorization checks.
 ### �📝 Requirements
 
 1. **Conditional Rendering**
+
    - Show/hide features based on user role
    - Show/hide features based on team leadership
    - Disable buttons for unauthorized actions
 
 2. **Authorization Checks**
+
    - Verify user role before showing actions
    - Check team leadership for manager actions
    - Display appropriate error messages
@@ -735,13 +772,14 @@ Implement proper role-based UI rendering and authorization checks.
 Create `useAuthorization`:
 
 **Hints:**
+
 - Return helper functions and booleans:
   - `isManager`: boolean check if user.role === 'MANAGER'
   - `isMember`: boolean check if user.role === 'MEMBER'
   - ...
 - Use this hook in components to simplify authorization logic
 - Example: `const { isManager, canAddMember } = useAuthorization();`
-  
+
 ```
 
 ### ✅ Acceptance Criteria
@@ -757,3 +795,4 @@ Create `useAuthorization`:
 - [ ] useAuthorization hook works correctly
 
 
+```
