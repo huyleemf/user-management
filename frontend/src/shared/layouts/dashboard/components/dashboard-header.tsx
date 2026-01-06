@@ -1,5 +1,5 @@
-import { authActions } from "@/features/auth/redux/slice";
-import type { User } from "@/features/users/api/types";
+import { authActions } from "@/redux/auth/slice";
+import type { User } from "@/data/users/types";
 import type { AppDispatch } from "@/redux/store";
 import { storage } from "@/shared/utils/storage";
 import { a11yProps, stringAvatar } from "@/shared/utils/utils";

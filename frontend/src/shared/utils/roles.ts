@@ -1,5 +1,5 @@
-import type { GetTeamsResponse } from "@/features/teams/api/types";
-import type { User } from "@/features/users/api/types";
+import type { GetTeamsResponse } from "@/data/teams/types";
+import type { User } from "@/data/users/types";
 import { useCallback, useMemo } from "react";
 import { storage } from "./storage";
 

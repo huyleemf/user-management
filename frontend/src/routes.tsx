@@ -3,11 +3,11 @@ import { createBrowserRouter } from "react-router";
 import DashboardLayout from "./shared/layouts/dashboard";
 import { RootErrorBoundary } from "./ErrorBoundary";
 
-const SignIn = lazy(() => import("./features/auth/pages/sign-in"));
-const Dashboard = lazy(() => import("./features/users/pages/dashboard"));
-const MemberTable = lazy(() => import("./features/users/pages/member.table"));
-const ManagerTable = lazy(() => import("./features/users/pages/manager.table"));
-const Teams = lazy(() => import("./features/teams/pages/teams"));
+const SignIn = lazy(() => import("./pages/auth"));
+const Dashboard = lazy(() => import("./pages/users/dashboard"));
+const MemberTable = lazy(() => import("./pages/users/members"));
+const ManagerTable = lazy(() => import("./pages/users/managers"));
+const Teams = lazy(() => import("./pages/teams"));
 
 const router = createBrowserRouter([
   {
