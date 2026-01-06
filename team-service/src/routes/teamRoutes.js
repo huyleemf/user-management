@@ -9,6 +9,7 @@ import {
   removeManager,
   getTeam,
   removeTeam,
+  getTeams,
 } from "../controllers/teamController.js";
 
 import protect from "../middleware/authenMiddleware.js";
@@ -20,6 +21,7 @@ router.delete(
   authorizeRoles,
   removeMember
 );
+router.get("/", protect, getTeams);
 
 router.post("/:teamId/members", protect, authorizeRoles, addMember);
 

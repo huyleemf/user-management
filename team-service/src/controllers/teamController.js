@@ -28,20 +28,20 @@ const createTeam = async (req, res, next) => {
         throw err;
       } else if (!isTeamFound) {
         const newTeam = await trx("Teams")
-          .insert({ teamName })
+          .insert({
+            teamName,
+            createdAt: trx.fn.now(),
+            updatedAt: trx.fn.now(),
+          })
           .returning(["teamId", "teamName"]);
 
-        console.log(newTeam);
-
-        const newLeader = await trx("Rosters")
+        await trx("Rosters")
           .insert({
             teamId: newTeam[0].teamId,
             userId: userId,
             isLeader: true,
           })
           .returning(["teamId", "isLeader", "userId"]);
-
-        console.log(newLeader);
 
         const managerList = await processArray(
           trx,
@@ -74,6 +74,75 @@ const createTeam = async (req, res, next) => {
   }
 };
 
+const getTeams = async (req, res, next) => {
+  const userId = req.user.userId;
+  try {
+    const isUserValid = await db("Users").where({ userId }).first();
+    if (!isUserValid) {
+      const err = new Error(`You are not allowed to view teams.`);
+      err.status = 400;
+      throw err;
+    }
+
+    const result = await db("Teams as t")
+      .innerJoin("Rosters as r", "t.teamId", "r.teamId")
+      .innerJoin("Users as u", "r.userId", "u.userId")
+      .select(
+        "t.teamId",
+        "t.teamName",
+        "u.userId",
+        "u.username",
+        "u.role",
+        "r.isLeader"
+      )
+      .orderBy("t.teamId");
+
+    if (!result || !result.length) {
+      const err = new Error(`Teams are not found.`);
+      err.status = 400;
+      throw err;
+    }
+
+    // Group by teamId
+    const teamsMap = {};
+
+    result.forEach((row) => {
+      if (!teamsMap[row.teamId]) {
+        teamsMap[row.teamId] = {
+          teamId: row.teamId,
+          teamName: row.teamName,
+          teamLeader: null,
+          managers: [],
+          members: [],
+        };
+      }
+
+      if (row.isLeader) {
+        teamsMap[row.teamId].teamLeader = {
+          userId: row.userId,
+          username: row.username,
+        };
+      } else if (row.role === "MANAGER") {
+        teamsMap[row.teamId].managers.push({
+          managerId: row.userId,
+          managerName: row.username,
+        });
+      } else if (row.role === "MEMBER") {
+        teamsMap[row.teamId].members.push({
+          memberId: row.userId,
+          memberName: row.username,
+        });
+      }
+    });
+
+    // Convert to array
+    const teams = Object.values(teamsMap);
+
+    return res.status(200).json(teams);
+  } catch (err) {
+    next(err);
+  }
+};
 const getTeam = async (req, res, next) => {
   const { teamId } = req.params;
   const userId = req.user.userId;
@@ -252,6 +321,7 @@ const removeManager = async (req, res, next) => {
 
 export {
   createTeam,
+  getTeams,
   getTeam,
   removeTeam,
   addMember,
