@@ -1,6 +1,8 @@
+import { useCreateTeamMutation } from "@/data/teams/queries/mutation";
+import type { CreateTeamRequest } from "@/data/teams/types";
+import type { AppDispatch, RootState } from "@/redux/store";
 import { userActions } from "@/redux/users/slice";
 import { a11yProps } from "@/shared/utils/utils";
-import type { AppDispatch, RootState } from "@/redux/store";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import GroupIcon from "@mui/icons-material/Group";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
@@ -20,25 +22,20 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { enqueueSnackbar } from "notistack";
-import { useCreateTeamMutation } from "@/data/teams/queries/mutation";
-import type { CreateTeamRequest } from "@/data/teams/types";
+import React, { useEffect, useState } from "react";
+import { FormProvider, type SubmitHandler, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import TabsPanel from "./TabsPanel";
 
 const CreateTeamDialog: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [value, setValue] = useState<number>(0);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [formData, setFormData] = useState<CreateTeamRequest>({
-    teamName: "",
-    managers: [],
-    members: [],
-  });
-  const dispatch = useDispatch<AppDispatch>();
-
   const { mutate } = useCreateTeamMutation();
+
+  const form = useForm<CreateTeamRequest>();
+  const dispatch = useDispatch<AppDispatch>();
 
   const { managers, members, loading, error } = useSelector(
     (state: RootState) => state.user
@@ -56,49 +53,36 @@ const CreateTeamDialog: React.FC = () => {
     setValue(newValue);
   };
 
-  const handleUpdateFormData = useCallback(
-    (key: keyof CreateTeamRequest, value: any) => {
-      setFormData((prev) => ({ ...prev, [key]: value }));
-    },
-    []
-  );
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form Data Submitted: ", formData);
-    mutate(formData, {
+  const onSubmit: SubmitHandler<CreateTeamRequest> = (data) =>
+    mutate(data, {
       onSuccess: () => {
         setOpen(false);
-        setFormData({
-          teamName: "",
-          managers: [],
-          members: [],
-        });
         enqueueSnackbar("Team created successfully!", { variant: "success" });
       },
     });
-  };
 
   const handleSelectAll = () => {
     if (value === 1) {
-      if (formData.managers.length === managers.length) {
-        handleUpdateFormData("managers", []);
+      //eslint-disable-next-line
+      if (form.watch("managers").length === managers.length) {
+        form.setValue("managers", []);
         return;
       }
       const allManagers = managers.map((manager) => ({
         managerId: manager.userId,
         managerName: manager.username,
       }));
-      handleUpdateFormData("managers", allManagers);
+      form.setValue("managers", allManagers);
     } else {
-      if (formData.members.length === members.length) {
-        handleUpdateFormData("members", []);
+      if (form.watch("members").length === members.length) {
+        form.setValue("members", []);
         return;
       }
       const allMembers = members.map((member) => ({
         memberId: member.userId,
         memberName: member.username,
       }));
-      handleUpdateFormData("members", allMembers);
+      form.setValue("members", allMembers);
     }
   };
   const filteredMembers = members.filter(
@@ -114,209 +98,212 @@ const CreateTeamDialog: React.FC = () => {
 
   const toggleOpen = () => setOpen(!open);
   return (
-    <div>
-      <Button
-        variant="contained"
-        onClick={toggleOpen}
-        startIcon={<GroupAddIcon />}
-      >
-        Create New Team
-      </Button>
-      <Dialog open={open} onClose={toggleOpen}>
-        <DialogTitle
-          sx={{
-            paddingBottom: 0,
-          }}
-          fontWeight={600}
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Button
+          variant="contained"
+          onClick={toggleOpen}
+          startIcon={<GroupAddIcon />}
         >
-          New Team
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            padding: 0,
-          }}
-        >
-          <Stack spacing={2} sx={{ marginTop: 2, marginBottom: 2 }}>
-            <Box
-              sx={{
-                paddingInline: 3,
-              }}
-            >
-              <TextField
-                label="Team Name"
-                variant="filled"
-                fullWidth
-                value={formData.teamName}
-                onChange={(e) =>
-                  handleUpdateFormData("teamName", e.target.value)
-                }
-              />
-            </Box>
-            <Box sx={{ width: "100%", paddingInline: 3 }}>
-              <Tabs
-                value={value}
-                onChange={handleChange}
-                aria-label="basic tabs example"
-              >
-                <Tab
-                  label={
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <GroupIcon />
-                      <Typography fontWeight={500}>Members In Team</Typography>
-                      <Box>
-                        <Chip
-                          label={members.length}
-                          variant={value == 0 ? "filled" : "outlined"}
-                          color={value == 0 ? "primary" : "default"}
-                          sx={{
-                            height: "fit-content",
-                          }}
-                          slotProps={{
-                            label: {
-                              style: {
-                                padding: "0 6px",
-                              },
-                            },
-                          }}
-                        />
-                      </Box>
-                    </Stack>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  label={
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <AssignmentIndIcon />
-                      <Typography fontWeight={500}>Managers In Team</Typography>
-                      <Box>
-                        <Chip
-                          label={managers.length}
-                          variant={value == 1 ? "filled" : "outlined"}
-                          color={value == 1 ? "primary" : "default"}
-                          sx={{
-                            height: "fit-content",
-                          }}
-                          slotProps={{
-                            label: {
-                              style: {
-                                padding: "0 6px",
-                              },
-                            },
-                          }}
-                        />
-                      </Box>
-                    </Stack>
-                  }
-                  {...a11yProps(1)}
-                />
-              </Tabs>
-
-              <Box
-                sx={{ marginTop: 2 }}
-                display={"flex"}
-                flexDirection={"column"}
-                alignItems={"end"}
-              >
-                <TextField
-                  fullWidth
-                  onChange={(e) => setSearchValue(e.currentTarget.value)}
-                  variant="outlined"
-                  slotProps={{
-                    input: {
-                      startAdornment: <SearchIcon />,
-                    },
-                    htmlInput: {
-                      style: {
-                        padding: 8,
-                      },
-                    },
-                  }}
-                  placeholder={`Search ${
-                    value == 1 ? managers.length : members.length
-                  } ${value == 1 ? "managers" : "members"}`}
-                />
-                <Button
-                  variant="text"
-                  sx={{
-                    marginTop: 1,
-                    padding: 0,
-                    fontWeight: 500,
-                  }}
-                  onClick={handleSelectAll}
-                >
-                  {value == 1
-                    ? formData.managers.length == managers.length
-                      ? "Deselect"
-                      : "Select"
-                    : formData.members.length == members.length
-                    ? "Deselect"
-                    : "Select"}{" "}
-                  All {value == 1 ? managers.length : members.length}
-                </Button>
-              </Box>
-            </Box>
-            {loading ? (
-              <Box
-                display={"flex"}
-                alignItems={"center"}
-                justifyContent={"center"}
-                gap={1}
-              >
-                <CircularProgress /> <Typography>Loading users...</Typography>
-              </Box>
-            ) : error ? (
-              <Typography color={"error"}>Error: {error}</Typography>
-            ) : (
-              <Box
-                sx={{
-                  marginTop: 0,
-                }}
-              >
-                <TabsPanel
-                  value={value}
-                  index={0}
-                  users={filteredMembers}
-                  usersRole="MEMBER"
-                  onUpdateFormData={handleUpdateFormData}
-                  formData={formData}
-                />
-                <TabsPanel
-                  value={value}
-                  index={1}
-                  users={filteredManagers}
-                  usersRole="MANAGER"
-                  onUpdateFormData={handleUpdateFormData}
-                  formData={formData}
-                />
-              </Box>
-            )}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={toggleOpen}
+          Create New Team
+        </Button>
+        <Dialog open={open} onClose={toggleOpen}>
+          <DialogTitle
             sx={{
-              color: "GrayText",
-              fontWeight: 600,
+              paddingBottom: 0,
+            }}
+            fontWeight={600}
+          >
+            New Team
+          </DialogTitle>
+          <DialogContent
+            sx={{
+              padding: 0,
             }}
           >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={
-              loading ||
-              formData.teamName.trim() === "" ||
-              (formData.members.length === 0 && formData.managers.length === 0)
-            }
-          >
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+            <Stack spacing={2} sx={{ marginTop: 2, marginBottom: 2 }}>
+              <Box
+                sx={{
+                  paddingInline: 3,
+                }}
+              >
+                <TextField
+                  label="Team Name"
+                  variant="filled"
+                  fullWidth
+                  {...form.register("teamName", {
+                    required: "Team Name is required",
+                  })}
+                />
+                {form.formState.errors.teamName && (
+                  <span style={{ color: "red" }}>
+                    {form.formState.errors.teamName.message}
+                  </span>
+                )}
+              </Box>
+              <Box sx={{ width: "100%", paddingInline: 3 }}>
+                <Tabs
+                  value={value}
+                  onChange={handleChange}
+                  aria-label="basic tabs example"
+                >
+                  <Tab
+                    label={
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <GroupIcon />
+                        <Typography fontWeight={500}>
+                          Members In Team
+                        </Typography>
+                        <Box>
+                          <Chip
+                            label={members.length}
+                            variant={value == 0 ? "filled" : "outlined"}
+                            color={value == 0 ? "primary" : "default"}
+                            sx={{
+                              height: "fit-content",
+                            }}
+                            slotProps={{
+                              label: {
+                                style: {
+                                  padding: "0 6px",
+                                },
+                              },
+                            }}
+                          />
+                        </Box>
+                      </Stack>
+                    }
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    label={
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <AssignmentIndIcon />
+                        <Typography fontWeight={500}>
+                          Managers In Team
+                        </Typography>
+                        <Box>
+                          <Chip
+                            label={managers.length}
+                            variant={value == 1 ? "filled" : "outlined"}
+                            color={value == 1 ? "primary" : "default"}
+                            sx={{
+                              height: "fit-content",
+                            }}
+                            slotProps={{
+                              label: {
+                                style: {
+                                  padding: "0 6px",
+                                },
+                              },
+                            }}
+                          />
+                        </Box>
+                      </Stack>
+                    }
+                    {...a11yProps(1)}
+                  />
+                </Tabs>
+
+                <Box
+                  sx={{ marginTop: 2 }}
+                  display={"flex"}
+                  flexDirection={"column"}
+                  alignItems={"end"}
+                >
+                  <TextField
+                    fullWidth
+                    onChange={(e) => setSearchValue(e.currentTarget.value)}
+                    variant="outlined"
+                    slotProps={{
+                      input: {
+                        startAdornment: <SearchIcon />,
+                      },
+                      htmlInput: {
+                        style: {
+                          padding: 8,
+                        },
+                      },
+                    }}
+                    placeholder={`Search ${
+                      value == 1 ? managers.length : members.length
+                    } ${value == 1 ? "managers" : "members"}`}
+                  />
+                  <Button
+                    variant="text"
+                    sx={{
+                      marginTop: 1,
+                      padding: 0,
+                      fontWeight: 500,
+                    }}
+                    onClick={handleSelectAll}
+                  >
+                    {value == 1
+                      ? form.getValues("managers")?.length == managers.length
+                        ? "Deselect"
+                        : "Select"
+                      : form.getValues("members")?.length == members.length
+                      ? "Deselect"
+                      : "Select"}{" "}
+                    All {value == 1 ? managers.length : members.length}
+                  </Button>
+                </Box>
+              </Box>
+              {loading ? (
+                <Box
+                  display={"flex"}
+                  alignItems={"center"}
+                  justifyContent={"center"}
+                  gap={1}
+                >
+                  <CircularProgress /> <Typography>Loading users...</Typography>
+                </Box>
+              ) : error ? (
+                <Typography color={"error"}>Error: {error}</Typography>
+              ) : (
+                <Box
+                  sx={{
+                    marginTop: 0,
+                  }}
+                >
+                  <TabsPanel
+                    value={value}
+                    index={0}
+                    users={filteredMembers}
+                    usersRole="MEMBER"
+                  />
+                  <TabsPanel
+                    value={value}
+                    index={1}
+                    users={filteredManagers}
+                    usersRole="MANAGER"
+                  />
+                </Box>
+              )}
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={toggleOpen}
+              sx={{
+                color: "GrayText",
+                fontWeight: 600,
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              type="submit"
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={loading}
+            >
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </form>
+    </FormProvider>
   );
 };
 

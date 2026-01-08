@@ -1,8 +1,9 @@
+import type { CreateTeamRequest } from "@/data/teams/types";
 import { UserRoles, type UserByRole, type UserRole } from "@/data/users/types";
 import { stringAvatar } from "@/shared/utils/utils";
 import AddIcon from "@mui/icons-material/Add";
-import CheckIcon from "@mui/icons-material/Check";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import CheckIcon from "@mui/icons-material/Check";
 import {
   Avatar,
   Box,
@@ -14,26 +15,18 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import React, { useCallback } from "react";
-import type { CreateTeamRequest } from "@/data/teams/types";
+import React from "react";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
 interface TabPanelProps {
   users: UserByRole[];
   index: number;
   value: number;
   usersRole: UserRole;
-  onUpdateFormData: (key: keyof CreateTeamRequest, value: any) => void;
-  formData: CreateTeamRequest;
 }
 const TabsPanel: React.FC<TabPanelProps> = (props: TabPanelProps) => {
-  const { users, value, index, onUpdateFormData, formData, ...other } = props;
+  const { users, value, index, ...other } = props;
 
-  const handleUpdateFormData = useCallback(
-    (key: keyof CreateTeamRequest, value: any) => {
-      onUpdateFormData(key, value);
-    },
-    [onUpdateFormData]
-  );
   return (
     <div
       role="tabpanel"
@@ -67,11 +60,9 @@ const TabsPanel: React.FC<TabPanelProps> = (props: TabPanelProps) => {
           <List>
             {users.map((user) => (
               <UserListItem
-                onUpdateFormData={handleUpdateFormData}
                 usersRole={props.usersRole}
                 key={user.userId}
                 user={user}
-                formData={formData}
               />
             ))}
           </List>
@@ -84,38 +75,37 @@ const TabsPanel: React.FC<TabPanelProps> = (props: TabPanelProps) => {
 interface UserListItemProps {
   user: UserByRole;
   usersRole: UserRole;
-  onUpdateFormData: (key: keyof CreateTeamRequest, value: any) => void;
-  formData: CreateTeamRequest;
 }
 
-function UserListItem({
-  user,
-  usersRole,
-  onUpdateFormData,
-  formData,
-}: UserListItemProps) {
+function UserListItem({ user, usersRole }: UserListItemProps) {
   const isManager = usersRole === UserRoles.MANAGER;
+  const fieldName = isManager ? "managers" : "members";
+  const { control } = useFormContext<CreateTeamRequest>();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: fieldName,
+  });
+  const index = fields.findIndex((item: any) =>
+    isManager ? item.managerId === user.userId : item.memberId === user.userId
+  );
 
-  const isSelected = isManager
-    ? formData.managers.some((m) => m.managerId === user.userId)
-    : formData.members.some((m) => m.memberId === user.userId);
+  const isSelected = index !== -1;
+
   const handleToggle = () => {
-    if (isManager) {
-      const newManagers = isSelected
-        ? formData.managers.filter((m) => m.managerId !== user.userId)
-        : [
-            ...formData.managers,
-            { managerId: user.userId, managerName: user.username },
-          ];
-      onUpdateFormData("managers", newManagers);
+    if (isSelected) {
+      remove(index);
     } else {
-      const newMembers = isSelected
-        ? formData.members.filter((m) => m.memberId !== user.userId)
-        : [
-            ...formData.members,
-            { memberId: user.userId, memberName: user.username },
-          ];
-      onUpdateFormData("members", newMembers);
+      append(
+        isManager
+          ? {
+              managerId: user.userId,
+              managerName: user.username,
+            }
+          : {
+              memberId: user.userId,
+              memberName: user.username,
+            }
+      );
     }
   };
 

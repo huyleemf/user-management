@@ -1,101 +1,57 @@
 import type { AddUserDialogType } from "@/pages/teams/components/AddUserDialog";
-import { storage } from "@/shared/utils/storage";
-import { enqueueSnackbar } from "notistack";
+import { httpWrapper } from "@/shared/utils/utils";
 import type {
-  GetTeamsResponse,
   CreateTeamRequest,
   CreateTeamResponse,
+  GetTeamsResponse,
 } from "./types";
 
 const API_URL = `${import.meta.env.VITE_TEAM_SERVICE_API_URL}/teams`;
 
-async function getTeams(): Promise<GetTeamsResponse[]> {
-  try {
-    const response = await fetch(`${API_URL}`, {
+async function getTeams(): Promise<GetTeamsResponse> {
+  const response = await httpWrapper({
+    url: `${API_URL}`,
+    toast: {
+      showToast: true,
+      successMessage: "Fetch Teams successfully",
+      errorMessage: "Error fetching teams:",
+    },
+    options: {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${storage.get("accessToken") || ""}`,
-      },
-    });
-    const data = await response.json();
-
-    enqueueSnackbar(data.message || "Fetch Teams successfully", {
-      variant: !response.ok ? "error" : "success",
-    });
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = "/sign-in";
-        storage.clear();
-      }
-      throw new Error(`Error fetching teams: ${response.statusText}`);
-    }
-    return data;
-  } catch (error) {
-    console.error(error);
-    enqueueSnackbar(error + "", { variant: "error" });
-    return Promise.reject(error);
-  }
+    },
+  });
+  return response as GetTeamsResponse;
 }
 
 async function createTeam(
   formData: CreateTeamRequest
 ): Promise<CreateTeamResponse> {
-  try {
-    const response = await fetch(`${API_URL}`, {
+  const response = await httpWrapper({
+    url: `${API_URL}`,
+    toast: {
+      showToast: true,
+      successMessage: "Create Team successfully",
+      errorMessage: "Error creating team:",
+    },
+    options: {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${storage.get("accessToken") || ""}`,
-      },
-
       body: JSON.stringify(formData),
-    });
-    const data = await response.json();
-
-    enqueueSnackbar(data.message || "Create Team successfully", {
-      variant: !response.ok ? "error" : "success",
-    });
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = "/sign-in";
-        storage.clear();
-      }
-      throw new Error(`Error creating team: ${response.statusText}`);
-    }
-    return data;
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
+    },
+  });
+  return response as CreateTeamResponse;
 }
 
 async function getTeam(teamId: string): Promise<GetTeamsResponse> {
-  try {
-    const response = await fetch(`${API_URL}/${teamId}`, {
+  const response = await httpWrapper({
+    url: `${API_URL}/${teamId}`,
+    toast: {
+      showToast: false,
+    },
+    options: {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${storage.get("accessToken") || ""}`,
-      },
-    });
-
-    const data = await response.json();
-    enqueueSnackbar(data.message || "Fetch Team successfully", {
-      variant: !response.ok ? "error" : "success",
-    });
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = "/sign-in";
-        storage.clear();
-      }
-      throw new Error(`Error fetching team: ${response.statusText}`);
-    }
-    return data;
-  } catch (error) {
-    console.error(error);
-    return Promise.reject(error);
-  }
+    },
+  });
+  return response as GetTeamsResponse;
 }
 
 async function addToTeam(
@@ -104,43 +60,35 @@ async function addToTeam(
   userName: string,
   role: AddUserDialogType
 ): Promise<void> {
-  try {
-    let resp;
-    if (role == "member") {
-      resp = await fetch(`${API_URL}/${teamId}/members`, {
+  let resp;
+  if (role == "member") {
+    resp = await httpWrapper({
+      url: `${API_URL}/${teamId}/members`,
+      toast: {
+        showToast: true,
+        successMessage: "Add member to Team successfully",
+        errorMessage: `Error adding member to team: #${teamId}`,
+      },
+      options: {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${storage.get("accessToken") || ""}`,
-        },
         body: JSON.stringify({ memberId: userId, memberName: userName }),
-      });
-    } else if (role == "manager") {
-      resp = await fetch(`${API_URL}/${teamId}/managers`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${storage.get("accessToken") || ""}`,
-        },
-        body: JSON.stringify({ managerId: userId, managerName: userName }),
-      });
-    }
-    const data = await resp!.json();
-
-    enqueueSnackbar(data.message || "Add User to Team successfully", {
-      variant: !resp!.ok ? "error" : "success",
+      },
     });
-    if (!resp!.ok) {
-      if (resp!.status === 401) {
-        window.location.href = "/sign-in";
-        storage.clear();
-      }
-      throw new Error(`Error adding user to team: ${resp!.statusText}`);
-    }
-    return data;
-  } catch (error) {
-    console.error(error);
+  } else if (role == "manager") {
+    resp = await httpWrapper({
+      url: `${API_URL}/${teamId}/managers`,
+      toast: {
+        showToast: true,
+        successMessage: "Add Manager to Team successfully",
+        errorMessage: `Error adding manager to team: #${teamId}`,
+      },
+      options: {
+        method: "POST",
+        body: JSON.stringify({ managerId: userId, managerName: userName }),
+      },
+    });
   }
+  return resp as void;
 }
 
 async function removeFromTeam(
@@ -148,41 +96,35 @@ async function removeFromTeam(
   userId: string,
   role: AddUserDialogType
 ): Promise<void> {
-  try {
-    let resp;
-    if (role == "member") {
-      resp = await fetch(`${API_URL}/${teamId}/members/${userId}`, {
+  let resp;
+  if (role == "member") {
+    resp = await httpWrapper({
+      url: `${API_URL}/${teamId}/members/${userId}`,
+      toast: {
+        showToast: true,
+        successMessage: "Remove member from Team successfully",
+        errorMessage: `Error removing member from team: #${teamId}`,
+      },
+      options: {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${storage.get("accessToken") || ""}`,
-        },
         body: JSON.stringify({ userId }),
-      });
-    } else if (role == "manager") {
-      resp = await fetch(`${API_URL}/${teamId}/managers/${userId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${storage.get("accessToken") || ""}`,
-        },
-        body: JSON.stringify({ userId }),
-      });
-    }
-    const data = await resp!.json();
-    enqueueSnackbar(data.message || "Remove User from Team successfully", {
-      variant: !resp!.ok ? "error" : "success",
+      },
     });
-    if (!resp!.ok) {
-      if (resp!.status === 401) {
-        window.location.href = "/sign-in";
-        storage.clear();
-      }
-      throw new Error(`Error removing user from team: ${resp!.statusText}`);
-    }
-    return data;
-  } catch (error) {
-    console.error(error);
+  } else if (role == "manager") {
+    resp = await httpWrapper({
+      url: `${API_URL}/${teamId}/managers/${userId}`,
+      toast: {
+        showToast: true,
+        successMessage: "Remove Manager from Team successfully",
+        errorMessage: `Error removing manager from team: #${teamId}`,
+      },
+      options: {
+        method: "DELETE",
+        body: JSON.stringify({ userId }),
+      },
+    });
   }
+
+  return resp as void;
 }
-export { createTeam, getTeams, getTeam, addToTeam, removeFromTeam };
+export { addToTeam, createTeam, getTeam, getTeams, removeFromTeam };

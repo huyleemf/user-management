@@ -1,18 +1,18 @@
+import { authActions } from "@/redux/auth/slice";
 import type { AppDispatch, RootState } from "@/redux/store";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import MuiCard from "@mui/material/Card";
-import CssBaseline from "@mui/material/CssBaseline";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import Stack from "@mui/material/Stack";
 import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import * as React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { enqueueSnackbar } from "notistack";
-import { authActions } from "@/redux/auth/slice";
+import * as React from "react";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -58,20 +58,20 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignInForm() {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   const { loading, error, isAuthenticated } = useSelector(
     (state: RootState) => state.auth
   );
-
   React.useEffect(() => {
-    if (error) {
-      console.error("Login error:", error);
+    if (error !== null) {
       enqueueSnackbar(error, { variant: "error" });
     }
   }, [error]);
@@ -81,53 +81,14 @@ export default function SignInForm() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    // Validate inputs before submitting
-    if (!validateInputs()) {
-      return;
-    }
-
-    const data = new FormData(event.currentTarget);
-    dispatch(
-      authActions.loginRequested({
-        email: data.get("email") as string,
-        password: data.get("password") as string,
-      })
-    );
-  };
-
-  const validateInputs = () => {
-    const email = document.getElementById("email") as HTMLInputElement;
-    const password = document.getElementById("password") as HTMLInputElement;
-
-    let isValid = true;
-
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage("");
-    }
-
-    if (!password.value || password.value.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-    }
-
-    return isValid;
+  const onSubmit: SubmitHandler<{ email: string; password: string }> = (
+    data
+  ) => {
+    dispatch(authActions.loginRequested(data));
   };
 
   return (
-    <>
-      <CssBaseline enableColorScheme />
+    <form onSubmit={form.handleSubmit(onSubmit)}>
       <SignInContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <Typography
@@ -139,9 +100,6 @@ export default function SignInForm() {
           </Typography>
 
           <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
             sx={{
               display: "flex",
               flexDirection: "column",
@@ -152,35 +110,49 @@ export default function SignInForm() {
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
+                error={!!form.formState.errors.email?.message}
+                helperText={form.formState.errors.email?.message}
                 id="email"
-                type="email"
-                name="email"
+                type="text"
                 placeholder="your@email.com"
                 autoComplete="email"
                 autoFocus
-                required
                 fullWidth
                 variant="outlined"
-                color={emailError ? "error" : "primary"}
+                color={
+                  form.formState.errors.email?.message ? "error" : "primary"
+                }
+                {...form.register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Invalid email address",
+                  },
+                })}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                name="password"
+                error={!!form.formState.errors.password?.message}
+                helperText={form.formState.errors.password?.message}
                 placeholder="••••••"
                 type="password"
                 id="password"
                 autoComplete="current-password"
                 autoFocus
-                required
                 fullWidth
                 variant="outlined"
-                color={passwordError ? "error" : "primary"}
+                color={
+                  form.formState.errors.password?.message ? "error" : "primary"
+                }
+                {...form.register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters long",
+                  },
+                })}
               />
             </FormControl>
 
@@ -195,6 +167,6 @@ export default function SignInForm() {
           </Box>
         </Card>
       </SignInContainer>
-    </>
+    </form>
   );
 }

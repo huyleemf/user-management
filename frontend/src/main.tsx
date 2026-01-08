@@ -21,19 +21,17 @@ export default function Root() {
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
   return (
-    <html>
-      <body>
-        {isNavigating && (
-          <Backdrop
-            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
-            open={true}
-          >
-            <CircularProgress />
-          </Backdrop>
-        )}
-        <Outlet />
-      </body>
-    </html>
+    <>
+      {isNavigating && (
+        <Backdrop
+          sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+          open={true}
+        >
+          <CircularProgress />
+        </Backdrop>
+      )}
+      <Outlet />
+    </>
   );
 }
 

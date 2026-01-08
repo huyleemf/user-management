@@ -1,11 +1,13 @@
-import { authActions } from "@/redux/auth/slice";
 import type { User } from "@/data/users/types";
+import { authActions } from "@/redux/auth/slice";
 import type { AppDispatch } from "@/redux/store";
 import { storage } from "@/shared/utils/storage";
 import { a11yProps, stringAvatar } from "@/shared/utils/utils";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import EngineeringIcon from "@mui/icons-material/Engineering";
+import GroupsIcon from "@mui/icons-material/Groups";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Person2Icon from "@mui/icons-material/Person2";
-import DashboardIcon from "@mui/icons-material/Dashboard";
 import {
   Avatar,
   Box,
@@ -15,11 +17,32 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router";
-import EngineeringIcon from "@mui/icons-material/Engineering";
-import GroupsIcon from "@mui/icons-material/Groups";
+import { NavLink, useLocation, useNavigate } from "react-router";
+
+const urls = [
+  {
+    label: "Dashboard",
+    icon: <DashboardIcon />,
+    value: 0,
+  },
+  {
+    label: "Members",
+    icon: <Person2Icon />,
+    value: 1,
+  },
+  {
+    label: "Managers",
+    icon: <EngineeringIcon />,
+    value: 2,
+  },
+  {
+    label: "Teams",
+    icon: <GroupsIcon />,
+    value: 3,
+  },
+];
 
 const DashboardHeader: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -27,43 +50,9 @@ const DashboardHeader: React.FC = () => {
   const location = useLocation().pathname;
   const user: User | null = storage.get("user");
 
-  const [value, setValue] = useState<number>(1);
-  useEffect(() => {
-    if (location === "/" || location === "/dashboard") {
-      setValue(0);
-    } else if (location === "/members") {
-      setValue(1);
-    } else if (location === "/managers") {
-      setValue(2);
-    } else if (location === "/teams") {
-      setValue(3);
-    } else {
-      setValue(0);
-    }
-  }, [location]);
   const handleLogout = () => {
     dispatch(authActions.logout());
     navigate("/sign-in");
-  };
-
-  const handleChange = (newValue: number) => {
-    setValue(newValue);
-    switch (newValue) {
-      case 0:
-        navigate("/dashboard");
-        break;
-      case 1:
-        navigate("/members");
-        break;
-      case 2:
-        navigate("/managers");
-        break;
-      case 3:
-        navigate("/teams");
-        break;
-      default:
-        break;
-    }
   };
 
   return (
@@ -96,46 +85,47 @@ const DashboardHeader: React.FC = () => {
         </Stack>
       </Stack>
       <Box paddingInline={2}>
-        <Tabs value={value} onChange={(_, newValue) => handleChange(newValue)}>
-          <Tab
-            label={
-              <Stack direction={"row"} alignItems={"center"} gap={1}>
-                <DashboardIcon />
-                <Typography>Dashboard</Typography>
-              </Stack>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            label={
-              <Stack direction={"row"} alignItems={"center"} gap={1}>
-                <Person2Icon />
-                <Typography>Members</Typography>
-              </Stack>
-            }
-            {...a11yProps(1)}
-          />
-          <Tab
-            label={
-              <Stack direction={"row"} alignItems={"center"} gap={1}>
-                <EngineeringIcon />
-                <Typography>Managers</Typography>
-              </Stack>
-            }
-            {...a11yProps(2)}
-          />
-          <Tab
-            label={
-              <Stack direction={"row"} alignItems={"center"} gap={1}>
-                <GroupsIcon />
-                <Typography>Teams</Typography>
-              </Stack>
-            }
-            {...a11yProps(3)}
-          />
+        <Tabs
+          value={
+            urls.find((url) => location.includes(url.label.toLowerCase()))
+              ?.value || 0
+          }
+        >
+          {urls.map((url) => (
+            <NavTab
+              key={url.value}
+              label={url.label}
+              value={url.value}
+              icon={url.icon}
+            />
+          ))}
         </Tabs>
       </Box>
     </Box>
+  );
+};
+
+const NavTab = ({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+}) => {
+  return (
+    <NavLink to={label.toLowerCase()} style={{ textDecoration: "none" }}>
+      <Tab
+        label={
+          <Stack direction={"row"} alignItems={"center"} gap={1}>
+            {icon}
+            <Typography>{label}</Typography>
+          </Stack>
+        }
+        {...a11yProps(value)}
+      />
+    </NavLink>
   );
 };
 
